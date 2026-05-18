@@ -1,0 +1,188 @@
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border-color);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.titleInfo {
+  flex: 1;
+}
+
+.round {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.raceName {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+  color: #ffffff;
+}
+
+.circuit {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+}
+
+.podiumPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: 1rem;
+  background: rgba(0,0,0,0.4);
+  padding: 0.75rem;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.podiumItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.posBadge {
+  font-size: 0.8rem;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #000;
+}
+
+.p1 .posBadge { background-color: #FFD700; }
+.p2 .posBadge { background-color: #C0C0C0; }
+.p3 .posBadge { background-color: #CD7F32; }
+
+.driverInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.driverName {
+  font-size: 0.9rem;
+}
+
+.constructor {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.toggleBar {
+  background-color: var(--sidebar-bg);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  border-top: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.expandedContent {
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  animation: slideDown 0.3s ease-out;
+}
+
+.tabs {
+  display: flex;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tabBtn {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: none;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.tabBtn:hover {
+  background-color: #f1f3f5;
+  color: var(--f1-dark);
+}
+
+.activeTab {
+  color: var(--f1-red);
+  border-bottom: 2px solid var(--f1-red);
+  background-color: #ffffff;
+}
+
+.fullResults {
+  background-color: var(--card-bg);
+}
+
+.tableHeader {
+  display: flex;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--sidebar-bg);
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tableRow {
+  display: flex;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.colPos { width: 40px; font-weight: bold; }
+.colDriver { flex: 2; }
+.colTeam { flex: 2; color: var(--text-muted); }
+.colTime { flex: 1; text-align: right; }
+.colPts { width: 40px; text-align: right; font-weight: bold; color: var(--f1-red); }
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .podiumPreview {
+    margin-left: 0;
+    margin-top: 1rem;
+    width: 100%;
+  }
+  .colTeam { display: none; }
+}

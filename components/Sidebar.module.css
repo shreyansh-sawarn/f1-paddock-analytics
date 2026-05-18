@@ -1,0 +1,101 @@
+.sidebar {
+  width: 280px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.logoContainer {
+  padding: 0 1.5rem 2rem;
+}
+
+.logo {
+  font-size: 1.35rem;
+  color: var(--f1-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.lightsContainer {
+  display: flex;
+  gap: 3px;
+  background-color: #1a1a1a;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+.light {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--f1-red);
+  box-shadow: 0 0 4px var(--f1-red);
+}
+
+.navGroup {
+  margin-bottom: 2rem;
+}
+
+.navTitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.navList {
+  list-style: none;
+}
+
+.navItem {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.navItem:hover {
+  background-color: #efefef;
+}
+
+.navItem.active {
+  background-color: #ffffff;
+  border-left: 3px solid var(--f1-red);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.seriesIcon {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: #0078d7;
+  display: inline-block;
+}
+
+.activeIcon {
+  background-color: var(--f1-red);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
