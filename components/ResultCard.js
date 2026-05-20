@@ -135,12 +135,21 @@ export default function ResultCard({ race }) {
                     Qualifying
                   </button>
                 )}
+                {sessionData.sprintQualifying?.length > 0 && (
+                  <button 
+                    className={`${styles.tabBtn} ${activeTab === 'sprintQuali' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('sprintQuali')}
+                  >
+                    Sprint Quali
+                  </button>
+                )}
               </div>
               
               <div className={styles.tabContent}>
                 {activeTab === 'race' && renderTable(sessionData.results || initialResults, false)}
                 {activeTab === 'sprint' && renderTable(sessionData.sprint, false)}
                 {activeTab === 'qualifying' && renderTable(sessionData.qualifying, true)}
+                {activeTab === 'sprintQuali' && renderTable(sessionData.sprintQualifying, true)}
               </div>
             </>
           ) : (
