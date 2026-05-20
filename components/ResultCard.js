@@ -39,8 +39,12 @@ export default function ResultCard({ race }) {
         if (!res.ok) throw new Error('Failed to fetch session data');
         const data = await res.json();
         setSessionData(data);
-        if (!data.results?.length && data.sprint?.length) {
-           setActiveTab('sprint');
+        if (!data.results?.length) {
+           if (data.sprint?.length) {
+             setActiveTab('sprint');
+           } else if (data.sprintQualifying?.length) {
+             setActiveTab('sprintQuali');
+           }
         }
       } catch (err) {
         console.error(err);
@@ -140,7 +144,7 @@ export default function ResultCard({ race }) {
                     className={`${styles.tabBtn} ${activeTab === 'sprintQuali' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('sprintQuali')}
                   >
-                    Sprint Quali
+                    Sprint Qualifying
                   </button>
                 )}
               </div>
