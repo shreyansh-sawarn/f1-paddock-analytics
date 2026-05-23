@@ -116,7 +116,7 @@
 
 .tabs {
   display: flex;
-  background-color: #f8f9fa;
+  background-color: var(--badge-bg-alt);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -133,14 +133,14 @@
 }
 
 .tabBtn:hover {
-  background-color: #f1f3f5;
+  background-color: var(--hover-bg);
   color: var(--f1-dark);
 }
 
 .activeTab {
   color: var(--f1-red);
   border-bottom: 2px solid var(--f1-red);
-  background-color: #ffffff;
+  background-color: var(--card-bg);
 }
 
 .fullResults {

@@ -19,7 +19,7 @@
 
 .nextRace {
   border: 2px solid var(--f1-red);
-  background: linear-gradient(135deg, var(--card-bg) 0%, #fff5f5 100%);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--next-race-gradient-end) 100%);
 }
 
 .header {
@@ -111,4 +111,10 @@
     margin-left: 0;
     margin-top: 1rem;
   }
+}
+
+.sessionTimeContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }

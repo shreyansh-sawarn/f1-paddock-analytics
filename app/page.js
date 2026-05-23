@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import RaceCard from '@/components/RaceCard';
+import WorldClock from '@/components/WorldClock';
+import { circuitData } from '@/lib/circuitData';
+import styles from './page.module.css';
 
 export default function Home() {
   const [schedule, setSchedule] = useState([]);
@@ -24,33 +27,44 @@ export default function Home() {
   }, []);
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem', color: 'var(--text-muted)' }}>Loading F1 Schedule...</div>;
+    return <div className={styles.loading}>Loading F1 Schedule...</div>;
   }
 
   if (error) {
-    return <div style={{ padding: '2rem', color: 'var(--f1-red)', fontWeight: 'bold' }}>Error: {error}</div>;
+    return <div className={styles.error}>Error: {error}</div>;
   }
 
-  // Filter out past races
   const now = new Date();
   const upcomingRaces = schedule.filter(race => {
     const raceDate = new Date(`${race.date}T${race.time || '00:00:00Z'}`);
     return raceDate > now;
   });
 
-  // The first race in the filtered list is the next upcoming race
   const nextRaceIndex = upcomingRaces.length > 0 ? 0 : -1;
+  const nextRace = upcomingRaces.length > 0 ? upcomingRaces[0] : null;
+  const nextRaceTimezone = nextRace ? (circuitData[nextRace.Circuit.circuitId]?.timezone || 'UTC') : null;
+  const nextRaceName = nextRace ? nextRace.Circuit.circuitName : null;
 
   return (
-    <div>
-      <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', color: 'var(--f1-dark)' }}>Formula 1 Schedule</h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Real-time updates dynamically converted to your local timezone.</p>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>Formula 1 Schedule</h1>
+          <p className={styles.subtitle}>Real-time updates dynamically converted to your timezone.</p>
+        </div>
+        
+        {/* World Clock Widget */}
+        {nextRaceTimezone && (
+          <WorldClock 
+            trackTimezone={nextRaceTimezone} 
+            trackName={nextRaceName} 
+          />
+        )}
       </header>
       
       <div className="race-list">
         {upcomingRaces.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No upcoming races found.</div>
+          <div className={styles.noRaces}>No upcoming races found.</div>
         ) : (
           upcomingRaces.map((race, idx) => (
             <RaceCard 

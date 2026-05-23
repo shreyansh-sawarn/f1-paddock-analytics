@@ -11,6 +11,51 @@
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
   --border-radius: 8px;
+
+  /* Theme specific helpers */
+  --hover-bg: #efefef;
+  --active-nav-bg: #ffffff;
+  --expanded-bg: #fafafa;
+  --badge-bg: #e9ecef;
+  --badge-bg-alt: #f1f3f5;
+  --toggle-bg: #e9ecef;
+  --next-race-gradient-end: #fff5f5;
+
+  /* World Clock specific variables */
+  --worldclock-bg: var(--card-bg);
+  --worldclock-border: var(--border-color);
+  --worldclock-text: var(--text-main);
+  --worldclock-muted: var(--text-muted);
+  --worldclock-hover: var(--text-main);
+  --clock-face-bg: #ffffff;
+  --clock-face-text: #15151e;
+  --clock-brand-text: rgba(21, 21, 30, 0.2);
+}
+
+[data-theme="dark"] {
+  --f1-dark: #f4f4f4;
+  --f1-light: #15151e;
+  --bg-color: #0b0b0e;
+  --card-bg: #121218;
+  --text-main: #f3f3f5;
+  --text-muted: #8a8a93;
+  --sidebar-bg: #0e0e13;
+  --border-color: #202029;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+
+  --hover-bg: #1c1c25;
+  --active-nav-bg: #181822;
+  --expanded-bg: #161620;
+  --badge-bg: #202029;
+  --badge-bg-alt: #1a1a24;
+  --toggle-bg: #181822;
+  --next-race-gradient-end: #221212;
+
+  /* World Clock specific variables */
+  --clock-face-bg: #1a1a24;
+  --clock-face-text: #ffffff;
+  --clock-brand-text: rgba(255, 255, 255, 0.15);
 }
 
 * {

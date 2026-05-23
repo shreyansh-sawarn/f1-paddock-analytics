@@ -13,6 +13,7 @@ export default function Sidebar() {
   const navItems = [
     { name: "Schedule", path: "/" },
     { name: "Results", path: "/results" },
+    { name: "Standings", path: "/standings" },
     { name: "Archive", path: "/archive" }
   ];
 
@@ -48,7 +49,7 @@ export default function Sidebar() {
         </ul>
       </div>
 
-      <div style={{ marginTop: 'auto', padding: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+      <div className={styles.footer}>
         Made with ❤️ by Shreyansh.
       </div>
     </aside>

@@ -4,8 +4,8 @@
 }
 
 .timeBlock {
-  background-color: var(--f1-dark);
-  color: #fff;
+  background-color: var(--badge-bg);
+  color: var(--text-main);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,6 +13,7 @@
   width: 60px;
   height: 60px;
   border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .number {
@@ -25,5 +26,5 @@
 .label {
   font-size: 0.6rem;
   text-transform: uppercase;
-  color: #aaa;
+  color: var(--text-muted);
 }

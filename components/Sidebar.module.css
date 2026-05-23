@@ -12,28 +12,29 @@
 }
 
 .logo {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   color: var(--f1-dark);
   display: flex;
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 .lightsContainer {
   display: flex;
-  gap: 3px;
+  gap: 2px;
   background-color: #1a1a1a;
-  padding: 6px 8px;
+  padding: 5px 6px;
   border-radius: 6px;
   border: 1px solid #333;
+  transform: translateY(2px);
 }
 
 .light {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: var(--f1-red);
   box-shadow: 0 0 4px var(--f1-red);
@@ -71,11 +72,11 @@
 }
 
 .navItem:hover {
-  background-color: #efefef;
+  background-color: var(--hover-bg);
 }
 
 .navItem.active {
-  background-color: #ffffff;
+  background-color: var(--active-nav-bg);
   border-left: 3px solid var(--f1-red);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
@@ -92,10 +93,23 @@
   background-color: var(--f1-red);
 }
 
+.footer {
+  margin-top: auto;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
+  }
+
+  .footer {
+    margin-top: 0;
+    padding: 1rem;
   }
 }

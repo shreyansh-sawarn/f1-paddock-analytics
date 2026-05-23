@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './RaceCard.module.css';
 import Countdown from './Countdown';
+import AnalogClock from './AnalogClock';
 import { circuitData } from '@/lib/circuitData';
 
 export default function RaceCard({ race, isNext }) {
@@ -15,9 +16,8 @@ export default function RaceCard({ race, isNext }) {
   
   const baseColor = isNext ? "rgba(225, 6, 0, 1)" : circuit.color;
 
-  
   useEffect(() => {
-    // Client-side timezone formatting
+    // Client-side timezone formatting (always local timezone)
     const formatTime = (dateStr, timeStr) => {
       if (!timeStr) return 'TBD';
       const date = new Date(`${dateStr}T${timeStr}`);
@@ -30,14 +30,28 @@ export default function RaceCard({ race, isNext }) {
       }).format(date);
     };
 
+    const formatTimeObj = (dateStr, timeStr) => {
+      if (!timeStr) return null;
+      return new Date(`${dateStr}T${timeStr}`);
+    };
+
     const s = [];
-    if (race.FirstPractice) s.push({ name: 'Free Practice 1', time: formatTime(race.FirstPractice.date, race.FirstPractice.time) });
-    if (race.SecondPractice) s.push({ name: 'Free Practice 2', time: formatTime(race.SecondPractice.date, race.SecondPractice.time) });
-    if (race.ThirdPractice) s.push({ name: 'Free Practice 3', time: formatTime(race.ThirdPractice.date, race.ThirdPractice.time) });
-    if (race.SprintQualifying) s.push({ name: 'Sprint Quali', time: formatTime(race.SprintQualifying.date, race.SprintQualifying.time) });
-    if (race.Sprint) s.push({ name: 'Sprint', time: formatTime(race.Sprint.date, race.Sprint.time) });
-    if (race.Qualifying) s.push({ name: 'Qualifying', time: formatTime(race.Qualifying.date, race.Qualifying.time) });
-    s.push({ name: 'Race', time: formatTime(race.date, race.time), isMain: true });
+    const addSession = (name, dateStr, timeStr, isMain = false) => {
+      s.push({
+        name,
+        formattedTime: formatTime(dateStr, timeStr),
+        rawTime: formatTimeObj(dateStr, timeStr),
+        isMain
+      });
+    };
+
+    if (race.FirstPractice) addSession('Free Practice 1', race.FirstPractice.date, race.FirstPractice.time);
+    if (race.SecondPractice) addSession('Free Practice 2', race.SecondPractice.date, race.SecondPractice.time);
+    if (race.ThirdPractice) addSession('Free Practice 3', race.ThirdPractice.date, race.ThirdPractice.time);
+    if (race.SprintQualifying) addSession('Sprint Qualifying', race.SprintQualifying.date, race.SprintQualifying.time);
+    if (race.Sprint) addSession('Sprint', race.Sprint.date, race.Sprint.time);
+    if (race.Qualifying) addSession('Qualifying', race.Qualifying.date, race.Qualifying.time);
+    addSession('Race', race.date, race.time, true);
     
     setSessions(s);
   }, [race]);
@@ -83,7 +97,12 @@ export default function RaceCard({ race, isNext }) {
           {sessions.map((session, idx) => (
             <div key={idx} className={`${styles.sessionItem} ${session.isMain ? styles.mainSession : ''}`}>
               <span className={styles.sessionName}>{session.name}</span>
-              <span className={styles.sessionTime}>{session.time}</span>
+              <div className={styles.sessionTimeContainer}>
+                {session.rawTime && (
+                  <AnalogClock time={session.rawTime} />
+                )}
+                <span className={styles.sessionTime}>{session.formattedTime}</span>
+              </div>
             </div>
           ))}
         </div>

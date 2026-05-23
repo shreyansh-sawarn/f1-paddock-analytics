@@ -1,0 +1,180 @@
+.widgetContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--worldclock-bg);
+  border: 1px solid var(--worldclock-border);
+  border-radius: 12px;
+  padding: 1.2rem 1.8rem;
+  box-shadow: var(--shadow-md);
+  color: var(--worldclock-text);
+  max-width: 340px;
+  width: 100%;
+  flex-shrink: 0;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.timeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  color: var(--worldclock-muted);
+  transition: color 0.2s ease;
+}
+
+.timeRow:hover {
+  color: var(--worldclock-hover);
+}
+
+.active {
+  color: var(--worldclock-text) !important;
+  font-weight: bold;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: transparent;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.active .dot {
+  background-color: var(--worldclock-text);
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.value {
+  font-family: monospace, Courier, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.trackName {
+  font-size: 0.7rem;
+  color: var(--f1-red);
+  font-weight: 700;
+  margin-left: 18px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.clockContainer {
+  margin-left: 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.analogClock {
+  width: 72px;
+  height: 72px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+.bezel {
+  fill: #c30000;
+  stroke: #9d0000;
+  stroke-width: 0.5;
+}
+
+.bezelText {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 2px;
+  font-weight: 900;
+  fill: rgba(255, 255, 255, 0.65);
+  text-anchor: middle;
+  letter-spacing: 0.1px;
+}
+
+.dialFace {
+  fill: var(--clock-face-bg);
+  stroke: var(--clock-face-text);
+  stroke-width: 0.5;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.dialNumber {
+  font-family: 'Oswald', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  fill: var(--clock-face-text);
+  text-anchor: middle;
+  dominant-baseline: central;
+  transition: fill 0.2s;
+}
+
+.brandText {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 3.5px;
+  font-weight: 900;
+  fill: var(--clock-brand-text);
+  text-anchor: middle;
+  letter-spacing: 0.5px;
+  transition: fill 0.2s;
+}
+
+.brandSubtitle {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 2.2px;
+  font-weight: 700;
+  fill: #c30000;
+  opacity: 0.45;
+  text-anchor: middle;
+  letter-spacing: 0.8px;
+}
+
+.hourHand {
+  stroke: var(--clock-face-text);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  transition: stroke 0.2s;
+}
+
+.minuteHand {
+  stroke: var(--clock-face-text);
+  stroke-width: 2.0;
+  stroke-linecap: round;
+  transition: stroke 0.2s;
+}
+
+.secondHand {
+  stroke: #c30000;
+  stroke-width: 0.8;
+  stroke-linecap: round;
+}
+
+.pinCap {
+  fill: #c30000;
+  stroke: #ffffff;
+  stroke-width: 0.3;
+}
+
+@media (max-width: 480px) {
+  .widgetContainer {
+    max-width: 1000px;
+    width: 100%;
+  }
+}
