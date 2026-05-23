@@ -1,0 +1,70 @@
+.contentContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem 0.5rem 2rem;
+  width: 100%;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.logoText {
+  font-size: 1.15rem;
+  color: var(--f1-dark);
+  text-transform: uppercase;
+  letter-spacing: -0.3px;
+  margin: 0;
+  line-height: 1;
+}
+
+.lightsContainer {
+  display: flex;
+  gap: 2px;
+  background-color: #1a1a1a;
+  padding: 5px 6px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  transform: translateY(2px);
+}
+
+.light {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--f1-red);
+  box-shadow: 0 0 4px var(--f1-red);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .topHeader {
+    padding: 1rem 1rem 0.5rem 1rem;
+  }
+  .mainContent {
+    padding: 1rem;
+  }
+}

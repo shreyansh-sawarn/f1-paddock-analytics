@@ -1,7 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import ThemeToggle from "@/components/ThemeToggle";
+import AppLayout from "@/components/AppLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,15 +28,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={inter.className}>
-        <div className="layout-wrapper">
-          <Sidebar />
-          <main className="main-content">
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-              <ThemeToggle />
-            </div>
-            {children}
-          </main>
-        </div>
+        <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );
