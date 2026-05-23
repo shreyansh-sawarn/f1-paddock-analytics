@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 import ResultCard from '@/components/ResultCard';
 
@@ -55,7 +55,7 @@ export default function Archive() {
   }, []);
 
   // Fetch season data when a season is toggled or auto-expanded
-  const loadSeasonData = async (year) => {
+  const loadSeasonData = useCallback(async (year) => {
     if (!seasonData[year]) {
       setLoadingSeason(true);
       try {
@@ -69,7 +69,7 @@ export default function Archive() {
         setLoadingSeason(false);
       }
     }
-  };
+  }, [seasonData]);
 
   const toggleSeason = async (year) => {
     if (expandedSeason === year) {
@@ -85,10 +85,13 @@ export default function Archive() {
   // Auto-expand season card if yearSearch perfectly matches a loaded season year
   useEffect(() => {
     if (seasons.includes(yearSearch)) {
-      setExpandedSeason(yearSearch);
-      loadSeasonData(yearSearch);
+      const timeout = setTimeout(() => {
+        setExpandedSeason(yearSearch);
+        loadSeasonData(yearSearch);
+      }, 0);
+      return () => clearTimeout(timeout);
     }
-  }, [yearSearch, seasons]);
+  }, [yearSearch, seasons, loadSeasonData]);
 
   if (loading) {
     return <div style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem', color: 'var(--text-muted)' }}>Loading Archive...</div>;

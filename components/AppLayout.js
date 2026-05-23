@@ -14,7 +14,10 @@ export default function AppLayout({ children }) {
   useEffect(() => {
     const savedState = localStorage.getItem('sidebar-collapsed');
     if (savedState === 'true') {
-      setIsCollapsed(true);
+      const timeout = setTimeout(() => {
+        setIsCollapsed(true);
+      }, 0);
+      return () => clearTimeout(timeout);
     }
   }, []);
 

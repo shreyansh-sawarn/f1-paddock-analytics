@@ -8,6 +8,45 @@ import { circuitData } from '@/lib/circuitData';
 export default function RaceCard({ race, isNext }) {
   const [expanded, setExpanded] = useState(isNext);
   const [sessions, setSessions] = useState([]);
+  const [now, setNow] = useState(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setNow(new Date());
+    }, 0);
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update once every 60 seconds
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const getSessionState = (name, rawTime) => {
+    if (!now || !rawTime) return 'future';
+    
+    const startTime = new Date(rawTime);
+    const lowerName = name.toLowerCase();
+    
+    let durationMs = 1 * 60 * 60 * 1000; // Default: 1 hour (Practice sessions)
+    
+    if (lowerName.includes('qualifying') || lowerName.includes('sprint')) {
+      durationMs = 1.5 * 60 * 60 * 1000; // 1.5 hours
+    } else if (lowerName === 'race') {
+      durationMs = 3 * 60 * 60 * 1000; // 3 hours (Main race maximum absolute limit)
+    }
+    
+    const endTime = new Date(startTime.getTime() + durationMs);
+    
+    if (now > endTime) {
+      return 'completed';
+    } else if (now >= startTime && now <= endTime) {
+      return 'live';
+    } else {
+      return 'future';
+    }
+  };
 
   const circuit = circuitData[race.Circuit.circuitId] || { 
     color: "rgba(50, 50, 50, 1)", 
@@ -53,7 +92,10 @@ export default function RaceCard({ race, isNext }) {
     if (race.Qualifying) addSession('Qualifying', race.Qualifying.date, race.Qualifying.time);
     addSession('Race', race.date, race.time, true);
     
-    setSessions(s);
+    const timeout = setTimeout(() => {
+      setSessions(s);
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [race]);
 
   const raceDate = new Date(`${race.date}T${race.time || '00:00:00Z'}`);
@@ -94,17 +136,34 @@ export default function RaceCard({ race, isNext }) {
 
       {expanded && (
         <div className={styles.sessionsList}>
-          {sessions.map((session, idx) => (
-            <div key={idx} className={`${styles.sessionItem} ${session.isMain ? styles.mainSession : ''}`}>
-              <span className={styles.sessionName}>{session.name}</span>
-              <div className={styles.sessionTimeContainer}>
-                {session.rawTime && (
-                  <AnalogClock time={session.rawTime} />
-                )}
-                <span className={styles.sessionTime}>{session.formattedTime}</span>
+          {sessions.map((session, idx) => {
+            const state = getSessionState(session.name, session.rawTime);
+            const isCompleted = state === 'completed';
+            const isLive = state === 'live';
+            
+            return (
+              <div 
+                key={idx} 
+                className={`${styles.sessionItem} ${session.isMain ? styles.mainSession : ''} ${isCompleted ? styles.completedSession : ''} ${isLive ? styles.liveSession : ''}`}
+              >
+                <div className={styles.sessionNameContainer}>
+                  <span className={styles.sessionName}>{session.name}</span>
+                  {isLive && (
+                    <span className={styles.liveBadge}>
+                      Live
+                      <span className={styles.liveDot}></span>
+                    </span>
+                  )}
+                </div>
+                <div className={styles.sessionTimeContainer}>
+                  {session.rawTime && (
+                    <AnalogClock time={session.rawTime} />
+                  )}
+                  <span className={styles.sessionTime}>{session.formattedTime}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

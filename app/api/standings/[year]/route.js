@@ -35,12 +35,15 @@ async function fetchWithRetry(url, options = {}, retries = 3, delay = 500) {
 
 export async function GET(request, { params }) {
   const { year } = await params;
+  const currentYear = new Date().getFullYear();
+  const isPastYear = parseInt(year, 10) < currentYear;
+  const revalidateSecs = isPastYear ? 31536000 : 3600; // 1 year for past seasons, 1 hour for current season
 
   try {
     // 1. Fetch WDC and WCC standings in parallel with retry
     const [wdcRes, wccRes] = await Promise.all([
-      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json?limit=100`, { next: { revalidate: 3600 } }),
-      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json?limit=100`, { next: { revalidate: 3600 } })
+      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings.json?limit=100`, { next: { revalidate: revalidateSecs } }),
+      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings.json?limit=100`, { next: { revalidate: revalidateSecs } })
     ]);
 
     let wdcData = null;
@@ -55,7 +58,7 @@ export async function GET(request, { params }) {
     // 2. Fetch all race results (paginated)
     async function fetchAllRaceResults(year) {
       try {
-        const firstRes = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=0`, { next: { revalidate: 3600 } });
+        const firstRes = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=0`, { next: { revalidate: revalidateSecs } });
         if (!firstRes || !firstRes.ok) return [];
         const firstData = await firstRes.json();
         const total = parseInt(firstData.MRData?.total) || 0;
@@ -65,7 +68,7 @@ export async function GET(request, { params }) {
         if (total > 100) {
           // Fetch sequentially to prevent rate limits
           for (let offset = 100; offset < total; offset += 100) {
-            const res = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=${offset}`, { next: { revalidate: 3600 } });
+            const res = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=${offset}`, { next: { revalidate: revalidateSecs } });
             if (res && res.ok) {
               const data = await res.json();
               const races = data.MRData?.RaceTable?.Races || [];
@@ -90,7 +93,7 @@ export async function GET(request, { params }) {
     // 3. Fetch all qualifying results (paginated)
     async function fetchAllQualyResults(year) {
       try {
-        const firstRes = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/qualifying.json?limit=100&offset=0`, { next: { revalidate: 3600 } });
+        const firstRes = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/qualifying.json?limit=100&offset=0`, { next: { revalidate: revalidateSecs } });
         if (!firstRes || !firstRes.ok) return [];
         const firstData = await firstRes.json();
         const total = parseInt(firstData.MRData?.total) || 0;
@@ -100,7 +103,7 @@ export async function GET(request, { params }) {
         if (total > 100) {
           // Fetch sequentially to prevent rate limits
           for (let offset = 100; offset < total; offset += 100) {
-            const res = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/qualifying.json?limit=100&offset=${offset}`, { next: { revalidate: 3600 } });
+            const res = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/qualifying.json?limit=100&offset=${offset}`, { next: { revalidate: revalidateSecs } });
             if (res && res.ok) {
               const data = await res.json();
               const races = data.MRData?.RaceTable?.Races || [];
@@ -125,7 +128,7 @@ export async function GET(request, { params }) {
     // 4. Fetch all sprint race results (paginated)
     async function fetchAllSprintResults(year) {
       try {
-        const firstRes = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/sprint.json?limit=100&offset=0`, { next: { revalidate: 3600 } });
+        const firstRes = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/sprint.json?limit=100&offset=0`, { next: { revalidate: revalidateSecs } });
         if (!firstRes || !firstRes.ok) return [];
         const firstData = await firstRes.json();
         const total = parseInt(firstData.MRData?.total) || 0;
@@ -135,7 +138,7 @@ export async function GET(request, { params }) {
         if (total > 100) {
           // Fetch sequentially to prevent rate limits
           for (let offset = 100; offset < total; offset += 100) {
-            const res = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/sprint.json?limit=100&offset=${offset}`, { next: { revalidate: 3600 } });
+            const res = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/sprint.json?limit=100&offset=${offset}`, { next: { revalidate: revalidateSecs } });
             if (res && res.ok) {
               const data = await res.json();
               const races = data.MRData?.RaceTable?.Races || [];

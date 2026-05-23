@@ -8,11 +8,16 @@ export default function WorldClock({ trackTimezone, trackName }) {
 
   // Initialize time on client-side to prevent hydration mismatch
   useEffect(() => {
-    setTime(new Date());
+    const timeout = setTimeout(() => {
+      setTime(new Date());
+    }, 0);
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(timer);
+    };
   }, []);
 
   if (!time) {

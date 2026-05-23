@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
   const { year } = await params;
+  const currentYear = new Date().getFullYear();
+  const isPastYear = parseInt(year, 10) < currentYear;
+  const revalidateSecs = isPastYear ? 31536000 : 86400; // 1 year for past seasons, 1 day for current season
 
   try {
     async function fetchAllResults(year) {
-      const firstRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=0`, { next: { revalidate: 86400 } });
+      const firstRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=0`, { next: { revalidate: revalidateSecs } });
       const firstData = await firstRes.json();
       const total = parseInt(firstData.MRData.total) || 0;
       
@@ -14,7 +17,7 @@ export async function GET(request, { params }) {
       if (total > 100) {
         const fetches = [];
         for (let offset = 100; offset < total; offset += 100) {
-          fetches.push(fetch(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=${offset}`, { next: { revalidate: 86400 } }).then(r => r.json()));
+          fetches.push(fetch(`https://api.jolpi.ca/ergast/f1/${year}/results.json?limit=100&offset=${offset}`, { next: { revalidate: revalidateSecs } }).then(r => r.json()));
         }
         const restData = await Promise.all(fetches);
         
@@ -34,8 +37,8 @@ export async function GET(request, { params }) {
     }
 
     const [wdcRes, wccRes, resultsData] = await Promise.all([
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings/1.json`, { next: { revalidate: 86400 } }),
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings/1.json`, { next: { revalidate: 86400 } }),
+      fetch(`https://api.jolpi.ca/ergast/f1/${year}/driverStandings/1.json`, { next: { revalidate: revalidateSecs } }),
+      fetch(`https://api.jolpi.ca/ergast/f1/${year}/constructorStandings/1.json`, { next: { revalidate: revalidateSecs } }),
       fetchAllResults(year)
     ]);
 
@@ -66,7 +69,7 @@ export async function GET(request, { params }) {
     
     // If results are missing (future races or incomplete data), fallback to schedule
     if (races.length === 0) {
-      const fallbackRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}.json?limit=100`);
+      const fallbackRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}.json?limit=100`, { next: { revalidate: revalidateSecs } });
       if (fallbackRes.ok) {
         const fallbackData = await fallbackRes.json();
         races = fallbackData?.MRData?.RaceTable?.Races || [];
