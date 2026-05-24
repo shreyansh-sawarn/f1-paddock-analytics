@@ -53,7 +53,8 @@ export async function GET(request, { params }) {
       wdc = {
         driver: `${driverStandings.Driver.givenName} ${driverStandings.Driver.familyName}`,
         points: driverStandings.points,
-        constructor: driverStandings.Constructors[0]?.name
+        constructor: driverStandings.Constructors[0]?.name,
+        constructorId: driverStandings.Constructors[0]?.constructorId || null
       };
     }
 
@@ -61,6 +62,7 @@ export async function GET(request, { params }) {
     if (constructorStandings) {
       wcc = {
         name: constructorStandings.Constructor.name,
+        constructorId: constructorStandings.Constructor.constructorId || null,
         points: constructorStandings.points
       };
     }

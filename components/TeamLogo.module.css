@@ -1,0 +1,38 @@
+.logo {
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--f1-red) 0%, #ff4d4d 100%);
+  color: #ffffff;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Size variants */
+.sm {
+  width: 20px;
+  height: 20px;
+  font-size: 0.65rem;
+}
+
+.md {
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+}
+
+.lg {
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
+}

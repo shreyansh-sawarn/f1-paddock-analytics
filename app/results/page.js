@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import ResultCard from '@/components/ResultCard';
+import styles from './page.module.css';
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -39,28 +40,24 @@ export default function Results() {
   });
 
   return (
-    <div>
-      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className={styles.container}>
+      <header className={styles.header}>
         <div>
-          <h1 style={{ fontSize: '2rem', color: 'var(--f1-dark)' }}>Formula 1 Results</h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Completed races from the current season.</p>
+          <h1 className={styles.title}>Formula 1 Results</h1>
+          <p className={styles.subtitle}>Completed races from the current season.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Order:</label>
-          <select 
-            value={sortOrder} 
-            onChange={(e) => setSortOrder(e.target.value)}
-            style={{ 
-              padding: '0.5rem', 
-              borderRadius: '4px', 
-              border: '1px solid var(--border-color)', 
-              background: 'var(--card-bg)',
-              cursor: 'pointer' 
-            }}
-          >
-            <option value="desc">Latest First</option>
-            <option value="asc">Oldest First</option>
-          </select>
+        <div className={styles.controls}>
+          <label className={styles.label}>Order:</label>
+          <div className={styles.selectWrapper}>
+            <select 
+              value={sortOrder} 
+              onChange={(e) => setSortOrder(e.target.value)}
+              className={styles.orderSelect}
+            >
+              <option value="desc">Latest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
+          </div>
         </div>
       </header>
       

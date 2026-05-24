@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
+import TeamLogo from '@/components/TeamLogo';
 
 export default function StandingsPage() {
   const currentYear = new Date().getFullYear().toString();
@@ -166,7 +167,10 @@ export default function StandingsPage() {
                           <span className={styles.driverCode}>{item.driverCode}</span>
                           <span className={styles.driverNationality}>{item.nationality}</span>
                         </div>
-                        <div className={styles.constructorCell}>{item.constructorName}</div>
+                        <div className={styles.constructorCell}>
+                          <TeamLogo constructorId={item.constructorId} constructorName={item.constructorName} size="sm" />
+                          {item.constructorName}
+                        </div>
                         <div className={`${styles.winsCell} ${styles.textRight}`}>{item.wins}</div>
                         <div className={`${styles.pointsCell} ${styles.textRight}`}>{item.points}</div>
                       </div>
@@ -236,8 +240,11 @@ export default function StandingsPage() {
                       >
                         <div className={styles.posCell}>{item.position}</div>
                         <div className={styles.constructorNameCell}>
-                          <span className={styles.constructorNameText}>{item.constructorName}</span>
-                          <span className={styles.constructorNationality}>{item.nationality}</span>
+                          <TeamLogo constructorId={item.constructorId} constructorName={item.constructorName} size="md" />
+                          <div className={styles.constructorNameInfo}>
+                            <span className={styles.constructorNameText}>{item.constructorName}</span>
+                            <span className={styles.constructorNationality}>{item.nationality}</span>
+                          </div>
                         </div>
                         <div className={`${styles.winsCell} ${styles.textRight}`}>{item.wins}</div>
                         <div className={`${styles.pointsCell} ${styles.textRight}`}>{item.points}</div>

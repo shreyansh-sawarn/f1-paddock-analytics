@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 import ResultCard from '@/components/ResultCard';
+import TeamLogo from '@/components/TeamLogo';
 
 export default function Archive() {
   const [seasons, setSeasons] = useState([]);
@@ -148,14 +149,15 @@ export default function Archive() {
   };
 
   return (
-    <div>
-      <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', color: 'var(--f1-dark)' }}>F1 Archive</h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Explore past seasons, champions, and race results.</p>
-      </header>
-
-      {/* Filter and Search Dashboard */}
-      <div className={styles.searchControls}>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>F1 Archive</h1>
+          <p className={styles.subtitle}>Explore past seasons, champions, and race results.</p>
+        </div>
+        
+        {/* Filter and Search Dashboard */}
+        <div className={styles.searchControls}>
         {/* Season Year Filter Field */}
         <div className={styles.searchField} ref={yearContainerRef}>
           <label className={styles.searchLabel}>Season Year</label>
@@ -247,6 +249,8 @@ export default function Archive() {
           )}
         </div>
       </div>
+    </header>
+
 
       <div className={styles.seasonList}>
         {filteredSeasons.length === 0 ? (
@@ -278,6 +282,7 @@ export default function Archive() {
                             </h3>
                             {seasonData[year].wdc && (
                               <span className={styles.champDetails}>
+                                <TeamLogo constructorId={seasonData[year].wdc.constructorId} constructorName={seasonData[year].wdc.constructor} size="sm" />
                                 {seasonData[year].wdc.constructor} &bull; {seasonData[year].wdc.points} pts
                               </span>
                             )}
@@ -285,6 +290,7 @@ export default function Archive() {
                           <div className={styles.champCard}>
                             <span className={styles.champLabel}>World Constructor Champion</span>
                             <h3 className={styles.champName}>
+                              <TeamLogo constructorId={seasonData[year].wcc?.constructorId} constructorName={seasonData[year].wcc?.name} size="md" />
                               {seasonData[year].wcc ? seasonData[year].wcc.name : 'N/A'}
                             </h3>
                             {seasonData[year].wcc && (

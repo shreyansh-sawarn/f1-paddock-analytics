@@ -256,8 +256,28 @@
 }
 
 .constructorCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   color: var(--text-muted);
   font-weight: 600;
+}
+
+.constructorNameCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.constructorNameInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.constructorNameText {
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .winsCell {
