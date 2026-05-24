@@ -3,12 +3,17 @@ import React, { useState, useEffect } from 'react';
 import styles from './RaceCard.module.css';
 import Countdown from './Countdown';
 import AnalogClock from './AnalogClock';
+import Image from 'next/image';
 import { circuitData } from '@/lib/circuitData';
 
 export default function RaceCard({ race, isNext }) {
   const [expanded, setExpanded] = useState(isNext);
   const [sessions, setSessions] = useState([]);
   const [now, setNow] = useState(null);
+
+  useEffect(() => {
+    setExpanded(isNext);
+  }, [isNext]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -99,7 +104,8 @@ export default function RaceCard({ race, isNext }) {
   }, [race]);
 
   const raceDate = new Date(`${race.date}T${race.time || '00:00:00Z'}`);
-  const isPast = raceDate < new Date();
+  const raceEndTime = new Date(raceDate.getTime() + 3 * 60 * 60 * 1000);
+  const isPast = raceEndTime < new Date();
 
   const cardClass = `${styles.card} ${isNext ? styles.nextRace : ''} ${isPast ? styles.pastRace : ''}`;
 
@@ -110,31 +116,33 @@ export default function RaceCard({ race, isNext }) {
     backgroundImage: `linear-gradient(90deg, ${baseColor} 0%, ${fadedColor} 50%, ${transparentColor} 100%), url('${circuit.image}')`,
     backgroundSize: 'cover',
     backgroundPosition: 'right center',
-    backgroundRepeat: 'no-repeat'
+    backgroundRepeat: 'no-repeat',
+    position: 'relative' // Ensure relative positioning for absolute children
   };
 
   return (
     <div className={cardClass} style={cardStyle}>
-      <div className={styles.header} onClick={() => setExpanded(!expanded)}>
-        <div className={styles.titleInfo}>
-          <div className={styles.round}>Round {race.round}</div>
-          <h2 className={styles.raceName}>{race.raceName}</h2>
-          <p className={styles.circuit}>{race.Circuit.circuitName}</p>
-        </div>
-        
-        {isNext && (
-          <div className={styles.countdownContainer}>
-            <Countdown targetDate={raceDate} />
+      <div className={styles.cardInner}>
+        <div className={styles.header} onClick={() => setExpanded(!expanded)}>
+          <div className={styles.titleInfo}>
+            <div className={styles.round}>Round {race.round}</div>
+            <h2 className={styles.raceName}>{race.raceName}</h2>
+            <p className={styles.circuit}>{race.Circuit.circuitName}</p>
           </div>
-        )}
-      </div>
+          
+          {isNext && (
+            <div className={styles.countdownContainer}>
+              <Countdown targetDate={raceDate} />
+            </div>
+          )}
+        </div>
 
-      <div className={styles.toggleBar} onClick={() => setExpanded(!expanded)}>
-        <span>{sessions.length} Sessions</span>
-        <span className={styles.toggleIcon}>{expanded ? '▲' : '▼'}</span>
-      </div>
+        <div className={styles.toggleBar} onClick={() => setExpanded(!expanded)}>
+          <span>{sessions.length} Sessions</span>
+          <span className={styles.toggleIcon}>{expanded ? '▲' : '▼'}</span>
+        </div>
 
-      {expanded && (
+        {expanded && (
         <div className={styles.sessionsList}>
           {sessions.map((session, idx) => {
             const state = getSessionState(session.name, session.rawTime);
@@ -166,6 +174,7 @@ export default function RaceCard({ race, isNext }) {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

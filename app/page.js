@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import RaceCard from '@/components/RaceCard';
 import WorldClock from '@/components/WorldClock';
 import { circuitData } from '@/lib/circuitData';
@@ -37,7 +38,8 @@ export default function Home() {
   const now = new Date();
   const upcomingRaces = schedule.filter(race => {
     const raceDate = new Date(`${race.date}T${race.time || '00:00:00Z'}`);
-    return raceDate > now;
+    const endTime = new Date(raceDate.getTime() + 3 * 60 * 60 * 1000); // 3 hours after race start
+    return endTime > now;
   });
 
   const nextRaceIndex = upcomingRaces.length > 0 ? 0 : -1;

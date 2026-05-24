@@ -38,6 +38,13 @@ const ArchiveIcon = () => (
   </svg>
 );
 
+const CircuitsIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <circle cx="12" cy="11" r="3" />
+  </svg>
+);
+
 const F1Icon = ({ className, size = 'small' }) => {
   const width = size === 'large' ? '56' : '36';
   const height = size === 'large' ? '14' : '9';
@@ -68,7 +75,8 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
     { name: "Schedule", path: "/", icon: <ScheduleIcon /> },
     { name: "Results", path: "/results", icon: <ResultsIcon /> },
     { name: "Standings", path: "/standings", icon: <StandingsIcon /> },
-    { name: "Archive", path: "/archive", icon: <ArchiveIcon /> }
+    { name: "Archive", path: "/archive", icon: <ArchiveIcon /> },
+    { name: "Circuits", path: "/circuits", icon: <CircuitsIcon /> }
   ];
 
   return (

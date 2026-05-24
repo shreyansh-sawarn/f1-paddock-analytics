@@ -1,0 +1,119 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.5rem;
+}
+
+.headerText {
+  flex: 1;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(to right, #fff, #a0a0a0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--card-bg);
+  color: var(--f1-red);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: rgba(225, 6, 0, 0.1);
+  border-color: rgba(225, 6, 0, 0.3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mapContainer {
+  height: 200px;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.svgMap {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)) brightness(1.2);
+}
+
+.noMap {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cardInfo {
+  padding: 1.25rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.circuitName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: #fff;
+}
+
+.location {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

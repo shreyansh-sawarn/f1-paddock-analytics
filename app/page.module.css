@@ -50,6 +50,32 @@
   border-radius: var(--border-radius);
 }
 
+.viewCircuitsContainer {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0 2rem 0;
+}
+
+.viewCircuitsBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--card-bg);
+  color: var(--f1-red);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.viewCircuitsBtn:hover {
+  background-color: rgba(225, 6, 0, 0.1);
+  border-color: rgba(225, 6, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 6, 0, 0.15);
+}
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;

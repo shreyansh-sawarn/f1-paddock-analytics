@@ -5,8 +5,23 @@ import AppLayout from "@/components/AppLayout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "F1 Schedule | LightsOuts Clone",
-  description: "Real-time F1 schedule and local timezone conversions.",
+  title: "Paddock Analytics",
+  description: "Real-time F1 schedule, archive, and analytics.",
+  appleWebApp: {
+    title: "Paddock",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' }
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }) {
