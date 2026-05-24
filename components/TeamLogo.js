@@ -20,9 +20,18 @@ export default function TeamLogo({ constructorId, constructorName, size = 'md' }
   const px = SIZE_MAP[size] || 24;
 
   if (logoUrl) {
+    if (typeof logoUrl === 'object' && logoUrl.light && logoUrl.dark) {
+      return (
+        <span className={`${styles.themeWrapper} ${sizeClass}`} title={constructorName || constructorId}>
+          <Image src={logoUrl.light} alt={constructorName || constructorId || 'Team logo'} width={px} height={px} className={`${styles.logo} ${styles.lightLogo}`} loading="lazy" draggable={false} unoptimized />
+          <Image src={logoUrl.dark} alt={constructorName || constructorId || 'Team logo'} width={px} height={px} className={`${styles.logo} ${styles.darkLogo}`} loading="lazy" draggable={false} unoptimized />
+        </span>
+      );
+    }
+    
     return (
       <Image
-        src={logoUrl}
+        src={typeof logoUrl === 'string' ? logoUrl : logoUrl.light}
         alt={constructorName || constructorId || 'Team logo'}
         width={px}
         height={px}

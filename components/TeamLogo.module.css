@@ -5,6 +5,28 @@
   vertical-align: middle;
 }
 
+.themeWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightLogo {
+  display: block;
+}
+
+.darkLogo {
+  display: none;
+}
+
+:global([data-theme="dark"]) .lightLogo {
+  display: none;
+}
+
+:global([data-theme="dark"]) .darkLogo {
+  display: block;
+}
+
 .fallback {
   display: inline-flex;
   align-items: center;
