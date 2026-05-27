@@ -197,3 +197,20 @@
   box-shadow: 0 8px 28px -6px var(--circuit-color, rgba(225, 6, 0, 0.35));
   border-color: var(--circuit-color);
 }
+
+.stopwatch {
+  color: #b026ff;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  filter: drop-shadow(0 0 3px rgba(176, 38, 255, 0.4));
+  transition: transform 0.2s ease, filter 0.2s ease;
+  flex-shrink: 0;
+}
+
+.stopwatch:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 6px rgba(176, 38, 255, 0.7));
+}
