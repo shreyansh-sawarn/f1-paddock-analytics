@@ -164,12 +164,17 @@ export default function RaceCard({ race, isNext }) {
       if ([0, 1].includes(code)) trackTempDiff = 13;
       else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) trackTempDiff = -2;
 
+      // Determine forecast confidence based on 48-hour window
+      const hoursToSession = (sessionTime.getTime() - new Date().getTime()) / (1000 * 60 * 60);
+      const confidence = hoursToSession <= 48 ? 'Live Forecast' : 'Early Outlook';
+
       return {
         temp: airTemp.toFixed(1),
         trackTemp: (airTemp + trackTempDiff).toFixed(1),
         humidity: weatherData.relative_humidity_2m[bestIdx],
         rainProb: weatherData.precipitation_probability[bestIdx],
-        code: code
+        code: code,
+        confidence
       };
     }
     return null;
@@ -321,6 +326,11 @@ export default function RaceCard({ race, isNext }) {
                       <WeatherIcon code={weather.code} />
                       <div className={styles.weatherTooltip}>
                         <div className={styles.tooltipTitle}>{session.name} Weather</div>
+                        <div className={styles.tooltipConfidence} style={{
+                          color: weather.confidence === 'Live Forecast' ? '#39ff14' : '#ffe600'
+                        }}>
+                          {weather.confidence === 'Live Forecast' ? '● Live Forecast' : '▲ Early Outlook'}
+                        </div>
                         <div className={styles.tooltipGrid}>
                           <div className={styles.tooltipItem}>
                             <span>Air Temp</span>

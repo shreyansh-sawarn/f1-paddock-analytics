@@ -242,9 +242,20 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--f1-red);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.25rem;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   padding-bottom: 0.2rem;
+}
+
+.tooltipConfidence {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 
 :global([data-theme="light"]) .tooltipTitle {
