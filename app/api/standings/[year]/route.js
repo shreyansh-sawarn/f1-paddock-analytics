@@ -179,7 +179,7 @@ export async function GET(request, { params }) {
         const driverId = res.Driver.driverId;
         const pos = parseInt(res.position);
         const status = res.status;
-        const isFinished = status === 'Finished' || status.startsWith('+');
+        const isFinished = !isNaN(parseInt(res.positionText || res.position));
 
         if (!driverStats[driverId]) {
           driverStats[driverId] = {
