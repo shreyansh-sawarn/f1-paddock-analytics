@@ -132,10 +132,10 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
           {navItems.map(item => {
             const isActive = pathname === item.path;
             return (
-              <li key={item.name} className={`${styles.navItem} ${isActive ? styles.active : ''}`}>
+              <li key={item.name}>
                 <Link 
                   href={item.path} 
-                  style={{ display: 'flex', alignItems: 'center', width: '100%', color: 'inherit', textDecoration: 'none' }}
+                  className={`${styles.navItem} ${isActive ? styles.active : ''}`}
                   title={isCollapsed ? item.name : undefined}
                 >
                   <span className={`${styles.navIconWrapper} ${isActive ? styles.activeIcon : ''}`}>
