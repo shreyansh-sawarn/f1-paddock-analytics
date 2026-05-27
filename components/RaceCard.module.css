@@ -191,3 +191,91 @@
   box-shadow: 0 8px 28px -6px var(--circuit-color, rgba(225, 6, 0, 0.35));
   border-color: var(--circuit-color);
 }
+
+.clockWeatherWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.weatherIconContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weatherTooltip {
+  position: absolute;
+  bottom: 125%;
+  right: 0;
+  transform: translateY(10px);
+  background: rgba(20, 20, 25, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  width: 170px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 99;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+:global([data-theme="light"]) .weatherTooltip {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.weatherIconContainer:hover .weatherTooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltipTitle {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--f1-red);
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 0.2rem;
+}
+
+:global([data-theme="light"]) .tooltipTitle {
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+.tooltipGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.tooltipItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.tooltipItem span {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tooltipItem strong {
+  font-size: 0.78rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+:global([data-theme="light"]) .tooltipItem strong {
+  color: #111115;
+}
+
