@@ -6,7 +6,11 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
   const [flipped, setFlipped] = useState(false);
 
   return (
-    <div className={styles.cardContainer} onClick={() => setFlipped(!flipped)}>
+    <div 
+      className={styles.cardContainer} 
+      onClick={() => setFlipped(!flipped)}
+      style={{ '--circuit-color': circuit.color || 'var(--f1-red)' }}
+    >
       <div className={`${styles.cardInner} ${flipped ? styles.isFlipped : ''}`}>
         
         {/* Front Face */}

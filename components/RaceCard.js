@@ -6,6 +6,27 @@ import AnalogClock from './AnalogClock';
 import Image from 'next/image';
 import { circuitData } from '@/lib/circuitData';
 
+const ChevronIcon = ({ expanded }) => (
+  <svg 
+    width="16" 
+    height="16" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    style={{ 
+      transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', 
+      transition: 'transform 0.25s ease',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    }}
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 export default function RaceCard({ race, isNext }) {
   const [expanded, setExpanded] = useState(isNext);
   const [sessions, setSessions] = useState([]);
@@ -117,7 +138,8 @@ export default function RaceCard({ race, isNext }) {
     backgroundSize: 'cover',
     backgroundPosition: 'right center',
     backgroundRepeat: 'no-repeat',
-    position: 'relative' // Ensure relative positioning for absolute children
+    position: 'relative', // Ensure relative positioning for absolute children
+    '--circuit-color': baseColor
   };
 
   return (
@@ -139,7 +161,9 @@ export default function RaceCard({ race, isNext }) {
 
         <div className={styles.toggleBar} onClick={() => setExpanded(!expanded)}>
           <span>{sessions.length} Sessions</span>
-          <span className={styles.toggleIcon}>{expanded ? '▲' : '▼'}</span>
+          <span className={styles.toggleIcon} style={{ display: 'flex', alignItems: 'center' }}>
+            <ChevronIcon expanded={expanded} />
+          </span>
         </div>
 
         {expanded && (

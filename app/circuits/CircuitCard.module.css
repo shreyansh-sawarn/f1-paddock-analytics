@@ -177,3 +177,24 @@
   gap: 0.5rem;
   margin-top: auto;
 }
+
+/* Ambient Glow in Dark Mode */
+:global([data-theme="dark"]) .cardFront {
+  box-shadow: 0 4px 20px -8px var(--circuit-color, rgba(225, 6, 0, 0.2));
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+:global([data-theme="dark"]) .cardContainer:hover .cardInner:not(.isFlipped) .cardFront {
+  box-shadow: 0 12px 32px -6px var(--circuit-color, rgba(225, 6, 0, 0.4));
+  border-color: var(--circuit-color);
+}
+
+:global([data-theme="dark"]) .cardBack {
+  box-shadow: 0 4px 20px -8px var(--circuit-color, rgba(225, 6, 0, 0.2));
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+:global([data-theme="dark"]) .cardContainer:hover .cardInner.isFlipped .cardBack {
+  box-shadow: 0 12px 32px -6px var(--circuit-color, rgba(225, 6, 0, 0.4));
+  border-color: var(--circuit-color);
+}

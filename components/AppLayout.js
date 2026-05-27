@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import ThemeToggle from './ThemeToggle';
 import { Oswald } from 'next/font/google';
@@ -8,6 +9,7 @@ import styles from './AppLayout.module.css';
 const oswald = Oswald({ subsets: ["latin"], weight: ["700"] });
 
 export default function AppLayout({ children }) {
+  const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Sync state with localStorage
@@ -52,7 +54,7 @@ export default function AppLayout({ children }) {
             <ThemeToggle />
           </div>
         </header>
-        <main className={styles.mainContent}>
+        <main className={`${styles.mainContent} page-transition`} key={pathname}>
           {children}
         </main>
       </div>

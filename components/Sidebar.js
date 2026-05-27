@@ -68,6 +68,25 @@ const F1Icon = ({ className, size = 'small' }) => {
   );
 };
 
+const CollapseIcon = ({ isCollapsed }) => (
+  <svg 
+    width="10" 
+    height="10" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.8" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    {isCollapsed ? (
+      <polyline points="9 18 15 12 9 6" />
+    ) : (
+      <polyline points="15 18 9 12 15 6" />
+    )}
+  </svg>
+);
+
 export default function Sidebar({ isCollapsed, toggleCollapse }) {
   const pathname = usePathname();
 
@@ -82,53 +101,33 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
       <div className={styles.logoContainer}>
-        {!isCollapsed ? (
-          <>
-            <div className={styles.logoWrapper}>
-              <div className={styles.lightsContainer}>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-              </div>
-              <h1 className={`${styles.logoText} ${oswald.className}`}>
-                Paddock Analytics
-              </h1>
-            </div>
-            <button 
-              className={styles.collapseBtn} 
-              onClick={toggleCollapse} 
-              aria-label="Collapse Sidebar"
-              title="Collapse Sidebar"
-            >
-              ◀
-            </button>
-          </>
-        ) : (
-          <button 
-            className={styles.collapseBtn} 
-            onClick={toggleCollapse} 
-            aria-label="Expand Sidebar"
-            title="Expand Sidebar"
-            style={{ margin: '0 auto' }}
-          >
-            ▶
-          </button>
-        )}
+        <div className={styles.logoWrapper}>
+          <div className={styles.lightsContainer}>
+            <div className={styles.light}></div>
+            <div className={styles.light}></div>
+            <div className={styles.light}></div>
+            <div className={styles.light}></div>
+            <div className={styles.light}></div>
+          </div>
+          <h1 className={`${styles.logoText} ${oswald.className}`}>
+            Paddock Analytics
+          </h1>
+        </div>
+        <button 
+          className={styles.collapseBtn} 
+          onClick={toggleCollapse} 
+          aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          <CollapseIcon isCollapsed={isCollapsed} />
+        </button>
       </div>
       
       <div className={styles.navGroup}>
-        {isCollapsed ? (
-          <div className={styles.navTitleIcon} title="Formula 1">
-            <F1Icon size="large" />
-          </div>
-        ) : (
-          <h3 className={styles.navTitle}>
-            <F1Icon size="small" />
-            <span className={styles.navTitleText}>FORMULA 1</span>
-          </h3>
-        )}
+        <h3 className={styles.navTitle}>
+          <F1Icon size={isCollapsed ? "large" : "small"} className={styles.navTitleIcon} />
+          <span className={styles.navTitleText}>FORMULA 1</span>
+        </h3>
         <ul className={styles.navList}>
           {navItems.map(item => {
             const isActive = pathname === item.path;
@@ -142,7 +141,7 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
                   <span className={`${styles.navIconWrapper} ${isActive ? styles.activeIcon : ''}`}>
                     {item.icon}
                   </span>
-                  {!isCollapsed && <span className={styles.navName}>{item.name}</span>}
+                  <span className={styles.navName}>{item.name}</span>
                 </Link>
               </li>
             );
@@ -151,7 +150,8 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
       </div>
 
       <div className={styles.footer}>
-        {isCollapsed ? '❤️' : 'Made with ❤️ by Shreyansh.'}
+        <span className={styles.footerText}>Made with ❤️ by Shreyansh.</span>
+        <span className={styles.footerHeart}>❤️</span>
       </div>
     </aside>
   );

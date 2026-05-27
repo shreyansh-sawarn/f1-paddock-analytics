@@ -3,6 +3,27 @@ import React, { useState } from 'react';
 import styles from './ResultCard.module.css';
 import { circuitData } from '@/lib/circuitData';
 
+const ChevronIcon = ({ expanded }) => (
+  <svg 
+    width="16" 
+    height="16" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    style={{ 
+      transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', 
+      transition: 'transform 0.25s ease',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    }}
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
 export default function ResultCard({ race }) {
   const [expanded, setExpanded] = useState(false);
   const [sessionData, setSessionData] = useState(null);
@@ -82,7 +103,7 @@ export default function ResultCard({ race }) {
   };
 
   return (
-    <div className={styles.card}>
+    <div className={styles.card} style={{ '--circuit-color': baseColor || 'var(--f1-red)' }}>
       <div className={styles.header} style={cardStyle} onClick={handleExpand}>
         <div className={styles.titleInfo}>
           <div className={styles.round}>Round {race.round}</div>
@@ -107,7 +128,9 @@ export default function ResultCard({ race }) {
 
       <div className={styles.toggleBar} onClick={handleExpand}>
         <span>{expanded ? 'Hide Classification' : 'Show Full Classification & Sessions'}</span>
-        <span className={styles.toggleIcon}>{expanded ? '▲' : '▼'}</span>
+        <span className={styles.toggleIcon} style={{ display: 'flex', alignItems: 'center' }}>
+          <ChevronIcon expanded={expanded} />
+        </span>
       </div>
 
       {expanded && (

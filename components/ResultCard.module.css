@@ -186,3 +186,14 @@
   }
   .colTeam { display: none; }
 }
+
+/* Ambient Glow in Dark Mode */
+:global([data-theme="dark"]) .card {
+  box-shadow: 0 4px 20px -8px var(--circuit-color, rgba(225, 6, 0, 0.15));
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+:global([data-theme="dark"]) .card:hover {
+  box-shadow: 0 8px 28px -6px var(--circuit-color, rgba(225, 6, 0, 0.35));
+  border-color: var(--circuit-color);
+}

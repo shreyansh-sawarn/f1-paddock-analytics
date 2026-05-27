@@ -14,12 +14,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logoWrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: opacity 0.25s ease, max-width 0.25s ease, gap 0.25s ease;
+  max-width: 220px;
+  opacity: 1;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .logoText {
@@ -85,11 +91,18 @@
   font-weight: 600;
   display: flex;
   align-items: center;
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), justify-content 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navTitleText {
   display: inline-block;
   transform: translateY(0.5px); /* Fine-tune F1 logo text alignment */
+  transition: opacity 0.2s ease, max-width 0.2s ease, margin 0.2s ease;
+  opacity: 1;
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-left: 0.4rem;
 }
 
 .navList {
@@ -140,7 +153,12 @@
   font-size: 0.95rem;
   font-weight: 600;
   margin-left: 0.75rem;
-  transition: opacity 0.2s;
+  transition: opacity 0.25s ease, max-width 0.25s ease, margin-left 0.25s ease;
+  opacity: 1;
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .footer {
@@ -150,6 +168,24 @@
   font-size: 0.85rem;
   color: var(--text-muted);
   transition: padding 0.3s, font-size 0.3s;
+  position: relative;
+}
+
+.footerText {
+  transition: opacity 0.25s ease;
+  opacity: 1;
+  display: block;
+}
+
+.footerHeart {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.25s ease;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 1.1rem;
 }
 
 /* COLLAPSED STATE STYLES */
@@ -159,8 +195,14 @@
 
 .sidebar.collapsed .logoContainer {
   padding: 0 0.5rem 1.5rem;
-  display: flex;
   justify-content: center;
+}
+
+.sidebar.collapsed .logoWrapper {
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  gap: 0;
 }
 
 .sidebar.collapsed .collapseBtn {
@@ -170,12 +212,16 @@
   box-shadow: var(--shadow-sm);
 }
 
-.sidebar.collapsed .navTitleIcon {
-  display: flex;
+.sidebar.collapsed .navTitle {
+  padding: 0;
   justify-content: center;
-  padding: 0.5rem 0;
-  margin-bottom: 0.75rem;
-  animation: fadeIn 0.2s ease-out;
+}
+
+.sidebar.collapsed .navTitleText {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+  pointer-events: none;
 }
 
 .sidebar.collapsed .navItem {
@@ -192,9 +238,23 @@
   margin: 0 auto;
 }
 
+.sidebar.collapsed .navName {
+  opacity: 0;
+  max-width: 0;
+  margin-left: 0;
+  pointer-events: none;
+}
+
+.sidebar.collapsed .footerText {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar.collapsed .footerHeart {
+  opacity: 1;
+}
+
 .sidebar.collapsed .footer {
-  text-align: center;
-  font-size: 1.1rem;
   padding: 1.5rem 0;
 }
 
