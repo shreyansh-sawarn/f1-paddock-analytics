@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import TeamLogo from '@/components/TeamLogo';
 import ProgressionChart from '@/components/ProgressionChart';
+import CostCapChart from '@/components/CostCapChart';
 
 export default function StandingsPage() {
   const currentYear = new Date().getFullYear().toString();
   const [seasons, setSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(currentYear);
   const [championship, setChampionship] = useState('driver'); // 'driver' or 'constructor'
+  const [chartType, setChartType] = useState('progression'); // 'progression' or 'costcap'
   const [standingsData, setStandingsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -113,7 +115,7 @@ export default function StandingsPage() {
         <div className={styles.toggleSlider}>
           <button 
             className={`${styles.toggleBtn} ${championship === 'driver' ? styles.activeToggle : ''}`}
-            onClick={() => { setChampionship('driver'); setExpandedId(null); }}
+            onClick={() => { setChampionship('driver'); setExpandedId(null); setChartType('progression'); }}
           >
             Driver Championship
           </button>
@@ -140,13 +142,38 @@ export default function StandingsPage() {
         </div>
       ) : standingsData ? (
         <>
-          {standingsData.progression && (
-            <ProgressionChart 
-              progressionData={standingsData.progression} 
-              type={championship} 
-              wdcData={standingsData.wdc}
-              wccData={standingsData.wcc}
+          {/* Sub-tabs for WCC Charts */}
+          {championship === 'constructor' && (
+            <div className={styles.chartToggleContainer}>
+              <button 
+                className={`${styles.chartToggleBtn} ${chartType === 'progression' ? styles.activeChartToggle : ''}`}
+                onClick={() => setChartType('progression')}
+              >
+                Points Progression
+              </button>
+              <button 
+                className={`${styles.chartToggleBtn} ${chartType === 'costcap' ? styles.activeChartToggle : ''}`}
+                onClick={() => setChartType('costcap')}
+              >
+                Cost-Cap ROI Analytics
+              </button>
+            </div>
+          )}
+
+          {chartType === 'costcap' && championship === 'constructor' ? (
+            <CostCapChart 
+              wccData={standingsData.wcc} 
+              season={selectedSeason} 
             />
+          ) : (
+            standingsData.progression && (
+              <ProgressionChart 
+                progressionData={standingsData.progression} 
+                type={championship} 
+                wdcData={standingsData.wdc}
+                wccData={standingsData.wcc}
+              />
+            )
           )}
 
           <div className={styles.tableWrapper}>

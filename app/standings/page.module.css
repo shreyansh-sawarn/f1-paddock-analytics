@@ -525,3 +525,42 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* CHART SUB-TOGGLES */
+.chartToggleContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chartToggleBtn {
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text-muted);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.chartToggleBtn:hover {
+  background-color: var(--sidebar-bg);
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+
+.activeChartToggle {
+  background-color: var(--f1-red);
+  color: #ffffff;
+  border-color: var(--f1-red);
+}
+
+.activeChartToggle:hover {
+  background-color: var(--f1-red);
+  color: #ffffff;
+  border-color: var(--f1-red);
+}

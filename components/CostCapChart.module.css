@@ -1,0 +1,262 @@
+.container {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.chartWrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.chartArea {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: visible;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chartSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.gridLine {
+  stroke: var(--border-color);
+  stroke-width: 1;
+}
+
+.quadLabel {
+  position: absolute;
+  padding: 0.75rem;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+
+.quadLabel:hover {
+  opacity: 0.8;
+}
+
+.quadTopLeft { top: 10px; left: 10px; }
+.quadTopRight { top: 10px; right: 10px; text-align: right; }
+.quadBottomLeft { bottom: 10px; left: 10px; }
+.quadBottomRight { bottom: 10px; right: 10px; text-align: right; }
+
+.quadTitle {
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.quadSubtitle {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.scatterPoint {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.scatterPoint:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  z-index: 100;
+}
+
+.pointDot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--card-bg);
+  transition: border-color 0.2s;
+}
+
+.scatterPoint:hover .pointDot {
+  border-color: #ffffff;
+}
+
+.pointLabel {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #000000;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  min-width: 170px;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.6);
+  z-index: 110;
+  animation: fadeIn 0.15s ease-out;
+  pointer-events: none;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+.tooltipBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.verdictBadge {
+  margin-top: 0.5rem;
+  border: 1px solid;
+  padding: 0.2rem;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.axesLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+}
+
+.efficiencyLeaderboard {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.25rem;
+}
+
+.leaderboardTitle {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.leaderboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.leaderboardRow {
+  background-color: var(--sidebar-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.rank {
+  font-weight: bold;
+  color: var(--text-muted);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.teamNameCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.efficiencyVal {
+  margin-right: 0.75rem;
+  color: var(--text-muted);
+}
+
+.ratingBadge {
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(5px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .chartArea {
+    height: 300px;
+  }
+  .quadLabel {
+    display: none;
+  }
+}
