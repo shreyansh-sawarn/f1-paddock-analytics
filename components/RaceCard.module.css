@@ -290,3 +290,103 @@
   color: #111115;
 }
 
+/* Calendar Button and Dropdown Styles */
+.calendarContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendarBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.calendarBtn:hover {
+  color: var(--f1-red);
+  background-color: var(--hover-bg);
+}
+
+.calendarPopover {
+  position: absolute;
+  bottom: 125%;
+  right: 0;
+  background: rgba(20, 20, 25, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.5rem;
+  width: 170px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+:global([data-theme="light"]) .calendarPopover {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes popoverFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.popoverTitle {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  padding: 0.2rem 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.2rem;
+}
+
+:global([data-theme="light"]) .popoverTitle {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.popoverItem {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+:global([data-theme="light"]) .popoverItem {
+  color: #111115;
+}
+
+.popoverItem:hover {
+  background-color: var(--hover-bg);
+  color: var(--f1-red);
+}
+
+

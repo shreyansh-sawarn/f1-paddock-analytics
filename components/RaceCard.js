@@ -32,7 +32,7 @@ const WeatherIcon = ({ code }) => {
   const iconStyle = {
     verticalAlign: 'middle',
     marginLeft: '0.4rem',
-    cursor: 'help',
+    cursor: 'default',
     flexShrink: 0
   };
 
@@ -88,6 +88,93 @@ export default function RaceCard({ race, isNext }) {
   const [sessions, setSessions] = useState([]);
   const [now, setNow] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
+  const [activeCalendarIndex, setActiveCalendarIndex] = useState(null);
+
+  // Close calendar popover on click outside
+  useEffect(() => {
+    if (activeCalendarIndex === null) return;
+    const handleOutsideClick = () => {
+      setActiveCalendarIndex(null);
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, [activeCalendarIndex]);
+
+  // Session duration logic
+  const getSessionTimes = (sessionName, rawTime) => {
+    if (!rawTime) return null;
+    const start = new Date(rawTime);
+    const lowerName = sessionName.toLowerCase();
+    let durationMs = 1 * 60 * 60 * 1000; // 1 hour for Practice
+    if (lowerName.includes('qualifying') || lowerName.includes('sprint')) {
+      durationMs = 1.5 * 60 * 60 * 1000;
+    } else if (lowerName === 'race') {
+      durationMs = 3 * 60 * 60 * 1000;
+    }
+    const end = new Date(start.getTime() + durationMs);
+    return { start, end };
+  };
+
+  // Google Calendar link builder
+  const getGoogleCalendarLink = (session, race) => {
+    const times = getSessionTimes(session.name, session.rawTime);
+    if (!times) return '#';
+    
+    const formatDateToGoogle = (date) => {
+      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    };
+    
+    const title = encodeURIComponent(`F1 ${race.date.split('-')[0]} - ${race.raceName} - ${session.name}`);
+    const dates = `${formatDateToGoogle(times.start)}/${formatDateToGoogle(times.end)}`;
+    const details = encodeURIComponent(`Formula 1 - ${race.raceName} - ${session.name} session. Powered by Paddock Analytics.`);
+    const location = encodeURIComponent(`${race.Circuit.circuitName}, ${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`);
+    
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+  };
+
+  // iCal/ICS file downloader
+  const downloadIcsFile = (session, race) => {
+    const times = getSessionTimes(session.name, session.rawTime);
+    if (!times) return;
+    
+    const title = `F1 ${race.date.split('-')[0]} - ${race.raceName} - ${session.name}`;
+    const location = `${race.Circuit.circuitName}, ${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`;
+    const description = `Formula 1 - ${race.raceName} - ${session.name} session. Powered by Paddock Analytics.`;
+    
+    const formatDateToIcs = (date) => {
+      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    };
+    
+    const startStr = formatDateToIcs(times.start);
+    const endStr = formatDateToIcs(times.end);
+    
+    const icsLines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Paddock Schedule//F1 Calendar//EN",
+      "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      `SUMMARY:${title}`,
+      `DTSTART:${startStr}`,
+      `DTEND:${endStr}`,
+      `LOCATION:${location}`,
+      `DESCRIPTION:${description}`,
+      "STATUS:CONFIRMED",
+      "SEQUENCE:0",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ];
+    
+    const blob = new Blob([icsLines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${title.replace(/[^a-zA-Z0-9]/g, "_")}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     setExpanded(isNext);
@@ -350,6 +437,53 @@ export default function RaceCard({ race, isNext }) {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Add to Calendar Button */}
+                  {!isCompleted && session.rawTime && (
+                    <div className={styles.calendarContainer}>
+                      <button 
+                        className={styles.calendarBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCalendarIndex(activeCalendarIndex === idx ? null : idx);
+                        }}
+                        title="Add to Calendar"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                          <line x1="12" y1="14" x2="12" y2="18" />
+                          <line x1="10" y1="16" x2="14" y2="16" />
+                        </svg>
+                      </button>
+                      
+                      {activeCalendarIndex === idx && (
+                        <div className={styles.calendarPopover} onClick={(e) => e.stopPropagation()}>
+                          <div className={styles.popoverTitle}>Add to Calendar</div>
+                          <a 
+                            href={getGoogleCalendarLink(session, race)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className={styles.popoverItem}
+                            onClick={() => setActiveCalendarIndex(null)}
+                          >
+                            Google Calendar
+                          </a>
+                          <button 
+                            className={styles.popoverItem}
+                            onClick={() => {
+                              downloadIcsFile(session, race);
+                              setActiveCalendarIndex(null);
+                            }}
+                          >
+                            iCal / Outlook (.ics)
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
