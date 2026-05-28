@@ -1,0 +1,322 @@
+.wrapper {
+  margin-bottom: 2rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-md);
+}
+
+.collapseHeader {
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-main);
+  outline: none;
+  font-family: inherit;
+  transition: background-color 0.2s;
+}
+
+.collapseHeader:hover {
+  background-color: var(--hover-bg);
+}
+
+.headerTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggleState {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--f1-red);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.content {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background-color: #151518;
+}
+
+:global([data-theme="light"]) .content {
+  background-color: #fafafb;
+}
+
+.noDataContainer {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: 2rem;
+}
+
+/* Quick Filters */
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-right: 0.5rem;
+}
+
+.pillButton {
+  background-color: var(--badge-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pillButton:hover {
+  border-color: var(--f1-red);
+  color: var(--text-main);
+  background-color: rgba(225, 6, 0, 0.05);
+}
+
+/* SVG Styling */
+.chartContainer {
+  position: relative;
+  width: 100%;
+  background-color: #101012;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  overflow: visible;
+}
+
+:global([data-theme="light"]) .chartContainer {
+  background-color: #ffffff;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gridLine line {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+:global([data-theme="light"]) .gridLine line {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+.gridLine:first-of-type line,
+.gridLine:last-of-type line {
+  stroke-dasharray: none;
+  stroke: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="light"]) .gridLine:first-of-type line,
+:global([data-theme="light"]) .gridLine:last-of-type line {
+  stroke: rgba(0, 0, 0, 0.12);
+}
+
+.yLabel, .xLabel {
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--text-muted);
+  font-family: monospace;
+}
+
+.yLabel {
+  text-anchor: end;
+}
+
+.xLabel {
+  text-anchor: middle;
+}
+
+.seriesLine {
+  transition: stroke-dashoffset 2s ease-in-out;
+}
+
+.seriesDot {
+  cursor: pointer;
+  transition: r 0.2s ease, stroke-width 0.2s ease;
+}
+
+.seriesDot:hover {
+  r: 6.5px;
+}
+
+/* Interactive Tooltip Card */
+.tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background-color: rgba(20, 20, 25, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  z-index: 100;
+  pointer-events: none;
+  min-width: 150px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  animation: fadeIn 0.15s ease-out;
+}
+
+:global([data-theme="light"]) .tooltip {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  color: #111115;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -90%); }
+  to { opacity: 1; transform: translate(-50%, -100%); }
+}
+
+.tooltipRound {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.15rem;
+}
+
+.tooltipTeamColor {
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.tooltipName {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+:global([data-theme="light"]) .tooltipName {
+  color: #111115;
+}
+
+.tooltipCode {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.tooltipConstructor {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.tooltipPoints {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.35rem;
+}
+
+:global([data-theme="light"]) .tooltipPoints {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.tooltipPoints strong {
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
+:global([data-theme="light"]) .tooltipPoints strong {
+  color: #111115;
+}
+
+/* Legend Grid */
+.legendGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.25rem;
+}
+
+.legendItem {
+  background: var(--badge-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.legendItem:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.legendItemActive {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color-active, rgba(255, 255, 255, 0.25));
+  color: var(--text-main);
+}
+
+:global([data-theme="light"]) .legendItemActive {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.legendColorBox {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.legendName {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

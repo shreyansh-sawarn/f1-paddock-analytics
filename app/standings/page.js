@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import TeamLogo from '@/components/TeamLogo';
+import ProgressionChart from '@/components/ProgressionChart';
 
 export default function StandingsPage() {
   const currentYear = new Date().getFullYear().toString();
@@ -138,8 +139,18 @@ export default function StandingsPage() {
           <p>{error}</p>
         </div>
       ) : standingsData ? (
-        <div className={styles.tableWrapper}>
-          {championship === 'driver' ? (
+        <>
+          {standingsData.progression && (
+            <ProgressionChart 
+              progressionData={standingsData.progression} 
+              type={championship} 
+              wdcData={standingsData.wdc}
+              wccData={standingsData.wcc}
+            />
+          )}
+
+          <div className={styles.tableWrapper}>
+            {championship === 'driver' ? (
             // DRIVER CHAMPIONSHIP TABLE
             <div className={styles.table}>
               <div className={`${styles.tableHeader} ${styles.driverGrid}`}>
@@ -302,7 +313,8 @@ export default function StandingsPage() {
             </div>
           )}
         </div>
-      ) : null}
+      </>
+    ) : null}
     </div>
   );
 }

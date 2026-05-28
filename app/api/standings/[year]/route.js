@@ -297,6 +297,66 @@ export async function GET(request, { params }) {
       });
     });
 
+    // 5.5 Compute round-by-round points progression for drivers and constructors
+    const roundsList = sortedRaces.map(race => ({
+      round: parseInt(race.round),
+      raceName: race.raceName,
+      locality: race.Circuit?.Location?.locality || race.Circuit?.circuitName || 'Unknown'
+    }));
+
+    const driverCumulative = {};
+    const constructorCumulative = {};
+    const driverSeries = {};
+    const constructorSeries = {};
+
+    const activeDriverIds = rawWdc.map(entry => entry.Driver.driverId);
+    const activeConstructorIds = rawWcc.map(entry => entry.Constructor.constructorId);
+
+    // Initialize series arrays
+    activeDriverIds.forEach(id => {
+      driverSeries[id] = [];
+    });
+    activeConstructorIds.forEach(id => {
+      constructorSeries[id] = [];
+    });
+
+    sortedRaces.forEach(race => {
+      const round = parseInt(race.round);
+      
+      // Update points from race results
+      const results = race.Results || [];
+      results.forEach(res => {
+        const driverId = res.Driver.driverId;
+        const constructorId = res.Constructor.constructorId;
+        const points = parseFloat(res.points) || 0;
+        
+        driverCumulative[driverId] = (driverCumulative[driverId] || 0) + points;
+        constructorCumulative[constructorId] = (constructorCumulative[constructorId] || 0) + points;
+      });
+
+      // Update points from sprint results for the same round
+      const sprintRace = allSprints.find(s => parseInt(s.round) === round);
+      if (sprintRace) {
+        const sprintResults = sprintRace.SprintResults || [];
+        sprintResults.forEach(res => {
+          const driverId = res.Driver.driverId;
+          const constructorId = res.Constructor.constructorId;
+          const points = parseFloat(res.points) || 0;
+          
+          driverCumulative[driverId] = (driverCumulative[driverId] || 0) + points;
+          constructorCumulative[constructorId] = (constructorCumulative[constructorId] || 0) + points;
+        });
+      }
+
+      // Record cumulative state at this round for all active competitors
+      activeDriverIds.forEach(id => {
+        driverSeries[id].push(Math.round((driverCumulative[id] || 0) * 100) / 100);
+      });
+      activeConstructorIds.forEach(id => {
+        constructorSeries[id].push(Math.round((constructorCumulative[id] || 0) * 100) / 100);
+      });
+    });
+
     // 6. Map computations back to WDC
     const wdc = rawWdc.map(entry => {
       const driverId = entry.Driver.driverId;
@@ -369,7 +429,12 @@ export async function GET(request, { params }) {
     return NextResponse.json({
       year,
       wdc,
-      wcc
+      wcc,
+      progression: {
+        rounds: roundsList,
+        drivers: driverSeries,
+        constructors: constructorSeries
+      }
     });
 
   } catch (error) {
