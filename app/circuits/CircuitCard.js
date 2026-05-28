@@ -61,6 +61,12 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
   const [pathLength, setPathLength] = useState(1000);
   const pathRef = useRef(null);
 
+  // Lap Simulator State
+  const [isPlayingLap, setIsPlayingLap] = useState(false);
+  const [lapProgress, setLapProgress] = useState(0);
+  const [currentSpeed, setCurrentSpeed] = useState(0);
+  const [carPos, setCarPos] = useState(null);
+
   useEffect(() => {
     if (svgUrl) {
       fetch(svgUrl)
@@ -89,8 +95,77 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
     }
   }, [svgPaths]);
 
+  // Lap Animation Loop
+  useEffect(() => {
+    if (!isPlayingLap || !pathRef.current || pathLength <= 0) {
+      setCarPos(null);
+      setCurrentSpeed(0);
+      return;
+    }
+
+    let animationFrameId;
+    let progress = 0;
+    let speed = 160; // Initial speed in km/h
+
+    const updateFrame = () => {
+      if (!pathRef.current) return;
+
+      try {
+        const path = pathRef.current;
+        const totalLen = path.getTotalLength() || pathLength;
+
+        if (progress >= totalLen) {
+          setIsPlayingLap(false);
+          setCarPos(null);
+          setCurrentSpeed(0);
+          return;
+        }
+
+        // 1. Get position coordinate
+        const pt = path.getPointAtLength(progress);
+        setCarPos({ x: pt.x, y: pt.y });
+
+        // 2. Curvature estimation
+        const delta = Math.min(4, totalLen * 0.005);
+        const prevProg = Math.max(0, progress - delta);
+        const nextProg = Math.min(totalLen, progress + delta);
+
+        const ptPrev = path.getPointAtLength(prevProg);
+        const ptNext = path.getPointAtLength(nextProg);
+
+        const angle1 = Math.atan2(pt.y - ptPrev.y, pt.x - ptPrev.x);
+        const angle2 = Math.atan2(ptNext.y - pt.y, ptNext.x - pt.x);
+
+        let diff = Math.abs(angle2 - angle1);
+        if (diff > Math.PI) diff = 2 * Math.PI - diff;
+
+        // Map curvature to speed: high curvature (sharp turn) -> 70 km/h, straight -> 340 km/h
+        const curvatureFactor = Math.min(1, diff / 0.35);
+        const targetSpeed = 340 - (curvatureFactor * 270);
+
+        // Transition actual speed towards target
+        const stepRate = targetSpeed < speed ? 15 : 5.5; // Braking decel is much faster than engine acceleration
+        speed += (targetSpeed - speed) * (stepRate / 100);
+        setCurrentSpeed(Math.round(speed));
+
+        // 3. Move along track (Slower progress scale for visible speed variation)
+        const speedScale = 0.012; 
+        progress += speed * speedScale;
+        setLapProgress(progress);
+
+        animationFrameId = requestAnimationFrame(updateFrame);
+      } catch (e) {
+        setIsPlayingLap(false);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateFrame);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isPlayingLap, pathLength]);
+
   const handleSectorClick = (e, sector) => {
     e.stopPropagation();
+    setIsPlayingLap(false); // Stop lap simulator if active
     if (activeSector === sector) {
       if (showHud) {
         setActiveSector(null);
@@ -164,58 +239,72 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
                       />
                     );
                   })}
+                  
+                  {/* Glowing Animated Car Dot */}
+                  {isPlayingLap && carPos && (
+                    <>
+                      <circle 
+                        cx={carPos.x} 
+                        cy={carPos.y} 
+                        r="7" 
+                        className={styles.carGlow}
+                      />
+                      <circle 
+                        cx={carPos.x} 
+                        cy={carPos.y} 
+                        r="3.5" 
+                        className={styles.carDot}
+                      />
+                    </>
+                  )}
                 </svg>
-                
-                {/* Telemetry HUD Panel */}
-                {activeSector && showHud && sectorInfo && (
-                  <div className={styles.hudOverlay} onClick={(e) => e.stopPropagation()}>
-                    <button 
-                      className={styles.hudClose} 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowHud(false);
-                      }}
-                      title="Close Telemetry"
-                    >
-                      &times;
-                    </button>
-                    {activeSector === 'drs' ? (
-                      <div>
-                        <div className={styles.hudTitle} style={{ color: '#39ff14' }}>DRS Activated</div>
-                        <div className={styles.hudRow}>
-                          <span>Speed Gain:</span> <strong>{sectorInfo.speedGain}</strong>
-                        </div>
-                        <div className={styles.hudRow}>
-                          <span>Advantage:</span> <span className={styles.hudText}>{sectorInfo.advantage}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className={styles.hudTitle} style={{ 
-                          color: activeSector === 1 ? '#00f0ff' : activeSector === 2 ? '#ffe600' : '#ff007f' 
-                        }}>
-                          Sector {activeSector} Telemetry
-                        </div>
-                        <div className={styles.hudGrid}>
-                          <div className={styles.hudItem}>
-                            <span>Max Speed:</span> <strong>{sectorInfo.maxSpeed}</strong>
-                          </div>
-                          <div className={styles.hudItem}>
-                            <span>Gear:</span> <strong>{sectorInfo.gear}</strong>
-                          </div>
-                          <div className={styles.hudItem} style={{ gridColumn: 'span 2' }}>
-                            <span>Key Corner:</span> <strong>{sectorInfo.corner}</strong>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             ) : svgUrl ? (
               <img src={svgUrl} alt={circuit.name} className={styles.svgMap} />
             ) : (
               <div className={styles.noMap}>Map Unavailable</div>
+            )}
+
+            {/* Telemetry HUD Panel positioned at the bottom of mapContainer */}
+            {((activeSector && showHud && sectorInfo) || isPlayingLap) && (
+              <div className={styles.hudOverlay} onClick={(e) => e.stopPropagation()}>
+                {activeSector && !isPlayingLap && (
+                  <button 
+                    className={styles.hudClose} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowHud(false);
+                    }}
+                    title="Close Telemetry"
+                  >
+                    &times;
+                  </button>
+                )}
+                {isPlayingLap ? (
+                  <div className={styles.hudHeaderRow}>
+                    <span className={styles.hudHeaderTitle} style={{ color: 'var(--f1-red)' }}>LIVE LAP</span>
+                    <span className={styles.hudHeaderItem}>Speed: <strong style={{ fontFamily: 'monospace' }}>{currentSpeed} km/h</strong></span>
+                    <span className={styles.hudHeaderItem}>G-Force: <strong style={{ fontFamily: 'monospace' }}>{Math.max(1.0, (1.0 + (330 - currentSpeed) / 60)).toFixed(1)} G</strong></span>
+                  </div>
+                ) : activeSector === 'drs' ? (
+                  <div className={styles.hudHeaderRow}>
+                    <span className={styles.hudHeaderTitle} style={{ color: '#39ff14' }}>DRS ACTIVE</span>
+                    <span className={styles.hudHeaderItem}>Gain: <strong>{sectorInfo.speedGain}</strong></span>
+                    <span className={styles.hudTextDetail} title={sectorInfo.advantage}>Advantage: <strong>{sectorInfo.advantage}</strong></span>
+                  </div>
+                ) : (
+                  <div className={styles.hudHeaderRow}>
+                    <span className={styles.hudHeaderTitle} style={{ 
+                      color: activeSector === 1 ? '#00f0ff' : activeSector === 2 ? '#ffe600' : '#ff007f' 
+                    }}>
+                      S{activeSector} Telemetry
+                    </span>
+                    <span className={styles.hudHeaderItem}>Max: <strong>{sectorInfo.maxSpeed}</strong></span>
+                    <span className={styles.hudHeaderItem}>Gear: <strong>{sectorInfo.gear}</strong></span>
+                    <span className={styles.hudTextDetail} title={sectorInfo.corner}>Corner: <strong>{sectorInfo.corner}</strong></span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
           <div className={styles.cardInfo}>
@@ -253,6 +342,17 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
                 onClick={(e) => handleSectorClick(e, 'drs')}
               >
                 DRS
+              </button>
+              <button 
+                className={`${styles.playPill} ${isPlayingLap ? styles.activePlay : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveSector(null);
+                  setShowHud(false);
+                  setIsPlayingLap(!isPlayingLap);
+                }}
+              >
+                {isPlayingLap ? 'Stop Lap ⏹️' : 'Play Lap ▶️'}
               </button>
             </div>
  
