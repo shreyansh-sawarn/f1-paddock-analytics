@@ -184,6 +184,8 @@
   z-index: 100;
   pointer-events: none;
   min-width: 150px;
+  max-height: 250px;
+  overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   animation: fadeIn 0.15s ease-out;
 }
@@ -196,8 +198,8 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -90%); }
-  to { opacity: 1; transform: translate(-50%, -100%); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .tooltipRound {
@@ -240,7 +242,20 @@
 .tooltipConstructor {
   font-size: 0.65rem;
   color: var(--text-muted);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.tooltipList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.tooltipItem {
+  display: flex;
+  flex-direction: column;
 }
 
 .tooltipPoints {
@@ -320,3 +335,33 @@
   overflow: hidden;
   white-space: nowrap;
 }
+
+.tooltipPinned {
+  pointer-events: auto !important; /* Enable interaction for scrollbar and close button */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  border-width: 1.5px;
+}
+
+.tooltipClose {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.4rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  transition: color 0.2s ease;
+  pointer-events: auto;
+}
+
+.tooltipClose:hover {
+  color: var(--f1-red);
+}
+
+.seriesDotPinned {
+  filter: drop-shadow(0 0 4px var(--f1-red));
+}
+

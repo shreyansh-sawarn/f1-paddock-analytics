@@ -7,6 +7,7 @@ export default function ProgressionChart({ progressionData, type, wdcData, wccDa
   const [isOpen, setIsOpen] = useState(false);
   const [visibleIds, setVisibleIds] = useState([]);
   const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [pinnedPoint, setPinnedPoint] = useState(null);
   const chartRef = useRef(null);
 
   const rounds = progressionData?.rounds || [];
@@ -36,6 +37,21 @@ export default function ProgressionChart({ progressionData, type, wdcData, wccDa
       }));
     }
   }, [progressionData, type, wdcData, wccData]);
+
+  // 1.5 Find all competitors tied at the active round's points total
+  const activePoint = pinnedPoint || hoveredPoint;
+
+  const activeCompetitors = React.useMemo(() => {
+    if (!activePoint) return [];
+    
+    return items.filter(item => {
+      // Must be visible
+      if (!visibleIds.includes(item.id)) return false;
+      
+      const pts = activePoint.roundIndex === 0 ? 0 : item.pointsHistory[activePoint.roundIndex - 1];
+      return pts === activePoint.points;
+    });
+  }, [activePoint, items, visibleIds]);
 
   // 2. Initialize visible lines
   useEffect(() => {
@@ -257,18 +273,21 @@ export default function ProgressionChart({ progressionData, type, wdcData, wccDa
                     />
                     {/* Data Point Circles */}
                     {coords.map((pt, idx) => {
-                      const isHovered = hoveredPoint && hoveredPoint.id === item.id && hoveredPoint.roundIndex === idx;
+                      const isPinned = pinnedPoint && pinnedPoint.id === item.id && pinnedPoint.roundIndex === idx;
+                      const isHovered = !pinnedPoint && hoveredPoint && hoveredPoint.id === item.id && hoveredPoint.roundIndex === idx;
+                      const isActive = isPinned || isHovered;
                       return (
                         <circle
                           key={`dot-${item.id}-${idx}`}
                           cx={pt.x}
                           cy={pt.y}
-                          r={isHovered ? 6 : 3.5}
-                          fill={item.color}
-                          stroke="var(--bg-color)"
-                          strokeWidth={isHovered ? 2 : 1}
-                          className={styles.seriesDot}
+                          r={isActive ? 6 : 3.5}
+                          fill={isActive ? 'var(--bg-color)' : item.color}
+                          stroke={item.color}
+                          strokeWidth={isActive ? 3 : 1}
+                          className={`${styles.seriesDot} ${isPinned ? styles.seriesDotPinned : ''}`}
                           onMouseEnter={(e) => {
+                            if (pinnedPoint) return;
                             e.stopPropagation();
                             const roundDetails = idx === 0 ? { raceName: 'Start of Season', locality: '' } : rounds[idx - 1];
                             setHoveredPoint({
@@ -284,7 +303,31 @@ export default function ProgressionChart({ progressionData, type, wdcData, wccDa
                               y: pt.y
                             });
                           }}
-                          onMouseLeave={() => setHoveredPoint(null)}
+                          onMouseLeave={() => {
+                            if (pinnedPoint) return;
+                            setHoveredPoint(null);
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (pinnedPoint && pinnedPoint.id === item.id && pinnedPoint.roundIndex === idx) {
+                              setPinnedPoint(null);
+                              setHoveredPoint(null);
+                            } else {
+                              const roundDetails = idx === 0 ? { raceName: 'Start of Season', locality: '' } : rounds[idx - 1];
+                              setPinnedPoint({
+                                id: item.id,
+                                name: item.name,
+                                code: item.code,
+                                constructorName: item.constructorName || (type === 'constructor' ? item.name : ''),
+                                color: item.color,
+                                roundIndex: idx,
+                                roundName: idx === 0 ? 'Initial Standings' : `Round ${idx}: ${roundDetails.locality || roundDetails.raceName}`,
+                                points: pt.val,
+                                x: pt.x,
+                                y: pt.y
+                              });
+                            }
+                          }}
                         />
                       );
                     })}
@@ -294,30 +337,73 @@ export default function ProgressionChart({ progressionData, type, wdcData, wccDa
             </svg>
 
             {/* Interactive Tooltip Card */}
-            {hoveredPoint && (
-              <div 
-                className={styles.tooltip}
-                style={{ 
-                  left: `${(hoveredPoint.x / svgWidth) * 100}%`,
-                  top: `${(hoveredPoint.y / svgHeight) * 100 - 15}%`,
-                  borderColor: hoveredPoint.color
-                }}
-              >
-                <div className={styles.tooltipRound}>{hoveredPoint.roundName}</div>
-                <div className={styles.tooltipHeader}>
-                  <div className={styles.tooltipTeamColor} style={{ backgroundColor: hoveredPoint.color }} />
-                  <div className={styles.tooltipName}>
-                    {hoveredPoint.name} {hoveredPoint.code && <span className={styles.tooltipCode}>{hoveredPoint.code}</span>}
+            {activePoint && (() => {
+              // Calculate horizontal alignment to prevent clipping on edges
+              let translateX = '-50%';
+              let leftOffset = 0;
+              if (activePoint.x < 150) {
+                translateX = '0%';
+                leftOffset = 10;
+              } else if (activePoint.x > svgWidth - 180) {
+                translateX = '-100%';
+                leftOffset = -10;
+              }
+
+              return (
+                <div 
+                  className={`${styles.tooltip} ${pinnedPoint ? styles.tooltipPinned : ''}`}
+                  style={{ 
+                    left: `calc(${(activePoint.x / svgWidth) * 100}% + ${leftOffset}px)`,
+                    top: `${(activePoint.y / svgHeight) * 100}%`,
+                    transform: activePoint.y < 120 ? `translate(${translateX}, 15px)` : `translate(${translateX}, -105%)`,
+                    borderColor: activePoint.color
+                  }}
+                  onClick={(e) => e.stopPropagation()} // Prevent closing tooltip when scrolling/interacting
+                >
+                  {pinnedPoint && (
+                    <button 
+                      className={styles.tooltipClose} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPinnedPoint(null);
+                        setHoveredPoint(null);
+                      }}
+                      title="Close"
+                    >
+                      &times;
+                    </button>
+                  )}
+                  
+                  <div className={styles.tooltipRound}>{activePoint.roundName}</div>
+                  
+                  {activePoint.roundIndex === 0 ? (
+                    <div className={styles.tooltipList} style={{ fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '0.65rem' }}>
+                      All competitors start at 0 points.
+                    </div>
+                  ) : (
+                    <div className={styles.tooltipList}>
+                      {activeCompetitors.map((comp) => (
+                        <div key={comp.id} className={styles.tooltipItem}>
+                          <div className={styles.tooltipHeader}>
+                            <div className={styles.tooltipTeamColor} style={{ backgroundColor: comp.color }} />
+                            <div className={styles.tooltipName}>
+                              {comp.name} {comp.code && <span className={styles.tooltipCode}>{comp.code}</span>}
+                            </div>
+                          </div>
+                          {comp.constructorName && (
+                            <div className={styles.tooltipConstructor}>{comp.constructorName}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className={styles.tooltipPoints}>
+                    Points: <strong>{activePoint.points}</strong>
                   </div>
                 </div>
-                {hoveredPoint.constructorName && (
-                  <div className={styles.tooltipConstructor}>{hoveredPoint.constructorName}</div>
-                )}
-                <div className={styles.tooltipPoints}>
-                  Points: <strong>{hoveredPoint.points}</strong>
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Interactive Legend Grid */}
