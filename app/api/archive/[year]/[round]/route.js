@@ -133,11 +133,51 @@ export async function GET(request, { params }) {
       }
     }
 
+    let openf1Sessions = [];
+    let openf1SessionKey = null;
+    if (race && race.date) {
+      const raceDate = new Date(race.date);
+      try {
+        const openF1SessionsRes = await fetchWithRetry(
+          `https://api.openf1.org/v1/sessions?year=${year}`,
+          revalidateSecs
+        );
+        if (openF1SessionsRes && openF1SessionsRes.ok) {
+          const allSessions = await openF1SessionsRes.json();
+          const weekendSessions = allSessions.filter(s => {
+             const sDate = new Date(s.date_start);
+             const diffTime = Math.abs(raceDate - sDate);
+             const diffDays = diffTime / (1000 * 60 * 60 * 24);
+             return diffDays <= 4;
+          });
+          
+          openf1Sessions = weekendSessions.map(s => ({
+            name: s.session_name,
+            key: s.session_key
+          }));
+
+          const qualifyingSession = weekendSessions.find(s => s.session_name === 'Qualifying');
+          const mainRace = weekendSessions.find(s => s.session_name === 'Race');
+          if (qualifyingSession) {
+            openf1SessionKey = qualifyingSession.session_key;
+          } else if (mainRace) {
+            openf1SessionKey = mainRace.session_key;
+          } else if (weekendSessions.length > 0) {
+            openf1SessionKey = weekendSessions[0].session_key;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to resolve OpenF1 weekend sessions:', err);
+      }
+    }
+
     return NextResponse.json({
       results,
       qualifying,
       sprint,
-      sprintQualifying
+      sprintQualifying,
+      openf1SessionKey,
+      openf1Sessions
     });
 
   } catch (error) {

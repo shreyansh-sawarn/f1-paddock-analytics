@@ -1,0 +1,290 @@
+.container {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.demoBadge {
+  font-size: 0.65rem;
+  font-weight: bold;
+  background-color: rgba(0, 168, 255, 0.15);
+  color: #00a8ff;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  border: 1px solid rgba(0, 168, 255, 0.25);
+}
+
+.description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.selectors {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.selectorField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  background-color: var(--sidebar-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.select:focus {
+  border-color: var(--f1-red);
+}
+
+.selectWrapper::after {
+  content: "▼";
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.tabContainer {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.tabBtn {
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-main);
+}
+
+.activeTab {
+  background-color: rgba(225, 6, 0, 0.1);
+  color: var(--f1-red);
+  border-color: rgba(225, 6, 0, 0.2);
+}
+
+.chartWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.chartArea {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10;
+  border-radius: 6px;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top: 3px solid var(--f1-red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingOverlay p {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.fallbackNotice {
+  background-color: rgba(225, 6, 0, 0.05);
+  border: 1px solid rgba(225, 6, 0, 0.15);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--f1-red);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.chartLegend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  background-color: var(--sidebar-bg);
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+}
+
+.legendA {
+  border-left: 4px solid #00ffff;
+}
+
+.legendB {
+  border-left: 4px dashed #ff00ff;
+}
+
+.legendName {
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.legendLap {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.svgArea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.gridLine {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 0.5;
+}
+
+.pathLine {
+  fill: none;
+  stroke-width: 0.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: d 0.3s ease;
+}
+
+.pathA {
+  stroke: #00ffff;
+  filter: drop-shadow(0 0 1px rgba(0, 255, 255, 0.3));
+}
+
+.pathB {
+  stroke: #ff00ff;
+  filter: drop-shadow(0 0 1px rgba(255, 0, 255, 0.3));
+}
+
+.axisX {
+  position: absolute;
+  bottom: 5px;
+  right: 15px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.axisY {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.axisYBottom {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+}

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import styles from './ResultCard.module.css';
 import { circuitData } from '@/lib/circuitData';
+import TelemetryDashboard from './TelemetryDashboard';
 
 const ChevronIcon = ({ expanded }) => (
   <svg 
@@ -204,6 +205,12 @@ export default function ResultCard({ race }) {
                     Sprint Qualifying
                   </button>
                 )}
+                <button 
+                  className={`${styles.tabBtn} ${activeTab === 'telemetry' ? styles.activeTab : ''}`}
+                  onClick={() => setActiveTab('telemetry')}
+                >
+                  Telemetry Insights
+                </button>
               </div>
               
               <div className={styles.tabContent}>
@@ -211,6 +218,13 @@ export default function ResultCard({ race }) {
                 {activeTab === 'sprint' && renderTable(sessionData.sprint, false)}
                 {activeTab === 'qualifying' && renderTable(sessionData.qualifying, true)}
                 {activeTab === 'sprintQuali' && renderTable(sessionData.sprintQualifying, true)}
+                {activeTab === 'telemetry' && (
+                  <TelemetryDashboard 
+                    openf1SessionKey={sessionData.openf1SessionKey} 
+                    openf1Sessions={sessionData.openf1Sessions}
+                    results={sessionData.results || initialResults} 
+                  />
+                )}
               </div>
             </>
           ) : (
