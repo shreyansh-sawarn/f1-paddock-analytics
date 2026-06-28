@@ -53,6 +53,9 @@ export default function AppLayout({ children }) {
         <main className={`${styles.mainContent} page-transition`} key={pathname}>
           {children}
         </main>
+        <footer className={styles.mobileFooter}>
+          Made with ❤️ by Shreyansh.
+        </footer>
       </div>
     </div>
   );

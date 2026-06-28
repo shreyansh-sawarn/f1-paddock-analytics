@@ -84,4 +84,18 @@
   .desktopHidden {
     display: flex !important;
   }
+  .mobileFooter {
+    display: block !important;
+    text-align: center;
+    padding: 1.5rem 1rem calc(58px + 1.5rem + env(safe-area-inset-bottom)) 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+    background-color: var(--card-bg);
+  }
+}
+
+.mobileFooter {
+  display: none;
 }
