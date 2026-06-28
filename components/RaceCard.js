@@ -197,10 +197,23 @@ export default function RaceCard({ race, isNext }) {
     if (!expanded || !race.Circuit?.Location) return;
     
     const raceDate = new Date(race.date);
-    const diffDays = (raceDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
+    const today = new Date();
     
-    // Only fetch weather if the race is within 7 days in future or 3 days in past
-    if (diffDays > 7 || diffDays < -3) return;
+    // Find the Monday of the race week (0 = Sunday, 6 = Saturday)
+    const day = raceDate.getDay();
+    const offset = day === 0 ? -6 : 1 - day;
+    const raceWeekMonday = new Date(raceDate.getFullYear(), raceDate.getMonth(), raceDate.getDate() + offset);
+    
+    // Reset times to midnight local time for accurate calendar day calculations
+    const d1 = new Date(raceWeekMonday.getFullYear(), raceWeekMonday.getMonth(), raceWeekMonday.getDate());
+    const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dRace = new Date(raceDate.getFullYear(), raceDate.getMonth(), raceDate.getDate());
+    
+    const diffToMonday = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+    const diffToRace = Math.round((dRace - d2) / (1000 * 60 * 60 * 24));
+    
+    // Only fetch weather if today is Monday of the race week or later, and the race isn't more than 3 days in the past
+    if (diffToMonday > 0 || diffToRace < -3) return;
 
     let isMounted = true;
     const { lat, long } = race.Circuit.Location;
@@ -208,7 +221,7 @@ export default function RaceCard({ race, isNext }) {
     async function fetchWeather() {
       try {
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&hourly=temperature_2m,precipitation_probability,weather_code,relative_humidity_2m,apparent_temperature&timezone=auto`
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&hourly=temperature_2m,precipitation_probability,weather_code,relative_humidity_2m,apparent_temperature&timezone=auto&forecast_days=10`
         );
         if (!response.ok) throw new Error('API failure');
         const data = await response.json();

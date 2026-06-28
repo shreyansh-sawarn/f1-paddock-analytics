@@ -34,22 +34,18 @@ export default function AppLayout({ children }) {
       <Sidebar isCollapsed={isCollapsed} toggleCollapse={toggleCollapse} />
       <div className={styles.contentContainer}>
         <header className={styles.topHeader}>
-          {isCollapsed ? (
-            <div className={styles.logoWrapper}>
-              <div className={styles.lightsContainer}>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-                <div className={styles.light}></div>
-              </div>
-              <span className={`${styles.logoText} ${oswald.className}`}>
-                Paddock Analytics
-              </span>
+          <div className={`${styles.logoWrapper} ${!isCollapsed ? styles.desktopHidden : ''}`}>
+            <div className={styles.lightsContainer}>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
             </div>
-          ) : (
-            <div></div> // Empty spacing element to push ThemeToggle right
-          )}
+            <span className={`${styles.logoText} ${oswald.className}`}>
+              Paddock Analytics
+            </span>
+          </div>
           <div className={styles.topToggle}>
             <ThemeToggle />
           </div>

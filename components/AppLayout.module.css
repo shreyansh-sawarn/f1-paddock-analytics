@@ -13,6 +13,10 @@
   width: 100%;
 }
 
+.topToggle {
+  margin-left: auto;
+}
+
 .mainContent {
   flex: 1;
   padding: 1.5rem 2rem;
@@ -55,6 +59,10 @@
   box-shadow: 0 0 4px var(--f1-red);
 }
 
+.desktopHidden {
+  display: none;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -63,8 +71,17 @@
 @media (max-width: 768px) {
   .topHeader {
     padding: 1rem 1rem 0.5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
   }
   .mainContent {
     padding: 1rem;
+    padding-bottom: calc(64px + 1.5rem + env(safe-area-inset-bottom));
+  }
+  .desktopHidden {
+    display: flex !important;
   }
 }

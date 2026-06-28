@@ -99,60 +99,80 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
   ];
 
   return (
-    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
-      <div className={styles.logoContainer}>
-        <div className={styles.logoWrapper}>
-          <div className={styles.lightsContainer}>
-            <div className={styles.light}></div>
-            <div className={styles.light}></div>
-            <div className={styles.light}></div>
-            <div className={styles.light}></div>
-            <div className={styles.light}></div>
+    <>
+      <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
+        <div className={styles.logoContainer}>
+          <div className={styles.logoWrapper}>
+            <div className={styles.lightsContainer}>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+              <div className={styles.light}></div>
+            </div>
+            <h1 className={`${styles.logoText} ${oswald.className}`}>
+              Paddock Analytics
+            </h1>
           </div>
-          <h1 className={`${styles.logoText} ${oswald.className}`}>
-            Paddock Analytics
-          </h1>
+          <button 
+            className={styles.collapseBtn} 
+            onClick={toggleCollapse} 
+            aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            <CollapseIcon isCollapsed={isCollapsed} />
+          </button>
         </div>
-        <button 
-          className={styles.collapseBtn} 
-          onClick={toggleCollapse} 
-          aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-          <CollapseIcon isCollapsed={isCollapsed} />
-        </button>
-      </div>
-      
-      <div className={styles.navGroup}>
-        <h3 className={styles.navTitle}>
-          <F1Icon size={isCollapsed ? "large" : "small"} className={styles.navTitleIcon} />
-          <span className={styles.navTitleText}>FORMULA 1</span>
-        </h3>
-        <ul className={styles.navList}>
-          {navItems.map(item => {
-            const isActive = pathname === item.path;
-            return (
-              <li key={item.name}>
-                <Link 
-                  href={item.path} 
-                  className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-                  title={isCollapsed ? item.name : undefined}
-                >
-                  <span className={`${styles.navIconWrapper} ${isActive ? styles.activeIcon : ''}`}>
-                    {item.icon}
-                  </span>
-                  <span className={styles.navName}>{item.name}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+        
+        <div className={styles.navGroup}>
+          <h3 className={styles.navTitle}>
+            <F1Icon size={isCollapsed ? "large" : "small"} className={styles.navTitleIcon} />
+            <span className={styles.navTitleText}>FORMULA 1</span>
+          </h3>
+          <ul className={styles.navList}>
+            {navItems.map(item => {
+              const isActive = pathname === item.path;
+              return (
+                <li key={item.name}>
+                  <Link 
+                    href={item.path} 
+                    className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                    title={isCollapsed ? item.name : undefined}
+                  >
+                    <span className={`${styles.navIconWrapper} ${isActive ? styles.activeIcon : ''}`}>
+                      {item.icon}
+                    </span>
+                    <span className={styles.navName}>{item.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
-      <div className={styles.footer}>
-        <span className={styles.footerText}>Made with ❤️ by Shreyansh.</span>
-        <span className={styles.footerHeart}>❤️</span>
-      </div>
-    </aside>
+        <div className={styles.footer}>
+          <span className={styles.footerText}>Made with ❤️ by Shreyansh.</span>
+          <span className={styles.footerHeart}>❤️</span>
+        </div>
+      </aside>
+
+      <nav className={styles.mobileNav}>
+        {navItems.map(item => {
+          const isActive = pathname === item.path;
+          return (
+            <Link 
+              key={item.name}
+              href={item.path} 
+              className={`${styles.mobileNavItem} ${isActive ? styles.mobileActive : ''}`}
+            >
+              <span className={`${styles.mobileIconWrapper} ${isActive ? styles.mobileActiveIcon : ''}`}>
+                {item.icon}
+              </span>
+              <span className={styles.mobileNavName}>{item.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 }

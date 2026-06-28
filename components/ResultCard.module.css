@@ -185,6 +185,21 @@
     width: 100%;
   }
   .colTeam { display: none; }
+  
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tabBtn {
+    flex: 0 0 auto;
+    padding: 0.85rem 1.25rem;
+  }
 }
 
 /* Ambient Glow in Dark Mode */
