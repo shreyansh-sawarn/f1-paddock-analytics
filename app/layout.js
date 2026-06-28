@@ -5,10 +5,10 @@ import AppLayout from "@/components/AppLayout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Paddock Analytics",
+  title: "F1 Paddock Analytics",
   description: "Real-time F1 schedule, archive, and analytics.",
   appleWebApp: {
-    title: "Paddock",
+    title: "F1 Paddock Analytics",
     statusBarStyle: "default",
   },
 };

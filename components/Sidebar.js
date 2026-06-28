@@ -111,7 +111,7 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
               <div className={styles.light}></div>
             </div>
             <h1 className={`${styles.logoText} ${oswald.className}`}>
-              Paddock Analytics
+              F1 Paddock Analytics
             </h1>
           </div>
           <button 

@@ -1,4 +1,4 @@
-# 🏁 Paddock Analytics
+# 🏁 F1 Paddock Analytics
 
 A premium, modern, and responsive Formula 1 telemetry and statistics dashboard. Browse historical archives, track standings, view race schedules, and explore results with team branding.
 

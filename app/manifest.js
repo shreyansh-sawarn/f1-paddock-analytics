@@ -1,7 +1,7 @@
 export default function manifest() {
   return {
-    name: 'Paddock Analytics',
-    short_name: 'Paddock',
+    name: 'F1 Paddock Analytics',
+    short_name: 'F1 Paddock Analytics',
     description: 'Real-time F1 schedule, archive, and analytics.',
     start_url: '/',
     display: 'standalone',

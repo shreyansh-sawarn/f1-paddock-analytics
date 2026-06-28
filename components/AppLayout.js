@@ -43,7 +43,7 @@ export default function AppLayout({ children }) {
               <div className={styles.light}></div>
             </div>
             <span className={`${styles.logoText} ${oswald.className}`}>
-              Paddock Analytics
+              F1 Paddock Analytics
             </span>
           </div>
           <div className={styles.topToggle}>
