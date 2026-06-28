@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏁 Paddock Analytics
 
-## Getting Started
+A premium, modern, and responsive Formula 1 telemetry and statistics dashboard. Browse historical archives, track standings, view race schedules, and explore results with team branding.
 
-First, run the development server:
+![Paddock Analytics](public/apple-icon.png)
+
+## ✨ Features
+
+*   **🏆 Standings:** Real-time and historical Driver and Constructor Championship standings.
+*   **📅 Schedules & Results:** Detailed calendar of Grand Prix weekends, including practice sessions, qualifying, sprint shootouts, and race results.
+*   **📜 Historical Archive:** Dive deep into past Formula 1 seasons, constructors, and champions from 1950 onwards.
+*   **🎨 Dynamic Brand Aesthetics:** Custom-mapped, high-quality team logos (SVGs/PNGs) and team colors for all active and major historical constructors (e.g. Brawn GP, BMW Sauber, Force India, Caterham, Minardi).
+*   **📱 Responsive Design:** Sleek, glassmorphic layout optimized for both desktop views and mobile navigation (via collapsible navigation menu).
+
+## 🛠️ Tech Stack
+
+*   **Framework:** [Next.js](https://nextjs.org/) (App Router & Turbopack)
+*   **Library:** [React](https://react.dev/)
+*   **Styling:** Vanilla CSS (Custom layout variables)
+*   **Data Source:** Ergast API & OpenF1 API
+
+## 🚀 Getting Started
+
+### 1. Run the Development Server
+
+Clone the repository, install dependencies, and run the development server locally:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application in action.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 2. Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To create an optimized production build:
 
-## Learn More
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🌐 Deployment (Vercel)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This application is ready to deploy to the [Vercel Platform](https://vercel.com/new).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push your code to a GitHub, GitLab, or Bitbucket repository.
+2. Log in to Vercel and import your repository.
+3. Vercel automatically detects Next.js configurations and sets up continuous deployment on every push.
