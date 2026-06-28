@@ -452,6 +452,10 @@
   border-radius: 3px;
 }
 
+.mobileConstructor {
+  display: none;
+}
+
 /* RESPONSIVE CSS */
 @media (max-width: 768px) {
   .header {
@@ -468,22 +472,31 @@
     width: 100%;
   }
 
+  .driverCell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .mobileConstructor {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+  }
+
   .driverGrid {
-    grid-template-columns: 45px 3fr 1.5fr 75px;
+    grid-template-columns: 45px 1fr 60px 80px;
   }
   
   .constructorGrid {
-    grid-template-columns: 45px 3fr 85px;
+    grid-template-columns: 45px 1.5fr 60px 80px;
   }
 
   .constructorCell {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .winsCell {
-    display: none;
+    display: none !important;
   }
   
   .driverNationality, .constructorNationality {
@@ -498,23 +511,15 @@
 
 @media (max-width: 576px) {
   .driverGrid {
-    grid-template-columns: 35px 3fr 70px;
+    grid-template-columns: 35px 1fr 50px 70px;
   }
   
   .constructorGrid {
-    grid-template-columns: 35px 3fr 70px;
-  }
-
-  .constructorCell {
-    display: none;
+    grid-template-columns: 35px 1.5fr 50px 70px;
   }
 
   .driverFullName {
-    display: none;
-  }
-
-  .driverCode {
-    display: inline-block;
+    font-size: 0.85rem;
   }
 
   .formBox, .breakdownBox {

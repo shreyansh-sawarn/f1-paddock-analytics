@@ -389,4 +389,20 @@
   color: var(--f1-red);
 }
 
+@media (max-width: 500px) {
+  .sessionItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.85rem 0;
+  }
+  .sessionNameContainer {
+    width: 100%;
+  }
+  .sessionTimeContainer {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 

@@ -185,6 +185,8 @@
     width: 100%;
   }
   .colTeam { display: none; }
+  .colDriver { flex: 1.3; }
+  .colTime { flex: 1.7; text-align: right; }
   
   .tabs {
     overflow-x: auto;

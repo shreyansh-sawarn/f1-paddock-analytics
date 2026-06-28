@@ -183,8 +183,8 @@ export default function StandingsPage() {
               <div className={`${styles.tableHeader} ${styles.driverGrid}`}>
                 <div>Pos</div>
                 <div>Driver</div>
-                <div>Constructor</div>
-                <div className={styles.textRight}>Wins</div>
+                <div className={styles.constructorCell}>Constructor</div>
+                <div className={`${styles.winsCell} ${styles.textRight}`}>Wins</div>
                 <div className={styles.textRight}>Points</div>
               </div>
 
@@ -204,6 +204,10 @@ export default function StandingsPage() {
                           <span className={styles.driverFullName}>{item.driverName}</span>
                           <span className={styles.driverCode}>{item.driverCode}</span>
                           <span className={styles.driverNationality}>{item.nationality}</span>
+                          <div className={styles.mobileConstructor}>
+                            <TeamLogo constructorId={item.constructorId} constructorName={item.constructorName} size="sm" />
+                            <span>{item.constructorName}</span>
+                          </div>
                         </div>
                         <div className={styles.constructorCell}>
                           <TeamLogo constructorId={item.constructorId} constructorName={item.constructorName} size="sm" />
@@ -257,7 +261,7 @@ export default function StandingsPage() {
               <div className={`${styles.tableHeader} ${styles.constructorGrid}`}>
                 <div>Pos</div>
                 <div>Constructor</div>
-                <div className={styles.textRight}>Wins</div>
+                <div className={`${styles.winsCell} ${styles.textRight}`}>Wins</div>
                 <div className={styles.textRight}>Points</div>
               </div>
 

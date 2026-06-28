@@ -6,17 +6,17 @@ import Image from 'next/image';
 import { circuitData } from '@/lib/circuitData';
 
 const ChevronIcon = ({ expanded }) => (
-  <svg 
-    width="16" 
-    height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2.2" 
-    strokeLinecap="round" 
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ 
-      transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', 
+    style={{
+      transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
       transition: 'transform 0.25s ease',
       display: 'inline-block',
       verticalAlign: 'middle'
@@ -28,7 +28,7 @@ const ChevronIcon = ({ expanded }) => (
 
 const WeatherIcon = ({ code }) => {
   if (code === null || code === undefined) return null;
-  
+
   const iconStyle = {
     verticalAlign: 'middle',
     marginLeft: '0.4rem',
@@ -119,16 +119,16 @@ export default function RaceCard({ race, isNext }) {
   const getGoogleCalendarLink = (session, race) => {
     const times = getSessionTimes(session.name, session.rawTime);
     if (!times) return '#';
-    
+
     const formatDateToGoogle = (date) => {
       return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     };
-    
+
     const title = encodeURIComponent(`F1 ${race.date.split('-')[0]} - ${race.raceName} - ${session.name}`);
     const dates = `${formatDateToGoogle(times.start)}/${formatDateToGoogle(times.end)}`;
-    const details = encodeURIComponent(`Formula 1 - ${race.raceName} - ${session.name} session. Powered by Paddock Analytics.`);
+    const details = encodeURIComponent(`Formula 1 - ${race.raceName} - ${session.name} session. Powered by F1 Paddock Analytics.`);
     const location = encodeURIComponent(`${race.Circuit.circuitName}, ${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`);
-    
+
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
   };
 
@@ -136,18 +136,18 @@ export default function RaceCard({ race, isNext }) {
   const downloadIcsFile = (session, race) => {
     const times = getSessionTimes(session.name, session.rawTime);
     if (!times) return;
-    
+
     const title = `F1 ${race.date.split('-')[0]} - ${race.raceName} - ${session.name}`;
     const location = `${race.Circuit.circuitName}, ${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`;
-    const description = `Formula 1 - ${race.raceName} - ${session.name} session. Powered by Paddock Analytics.`;
-    
+    const description = `Formula 1 - ${race.raceName} - ${session.name} session. Powered by F1 Paddock Analytics.`;
+
     const formatDateToIcs = (date) => {
       return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     };
-    
+
     const startStr = formatDateToIcs(times.start);
     const endStr = formatDateToIcs(times.end);
-    
+
     const icsLines = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -164,7 +164,7 @@ export default function RaceCard({ race, isNext }) {
       "END:VEVENT",
       "END:VCALENDAR"
     ];
-    
+
     const blob = new Blob([icsLines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -195,23 +195,23 @@ export default function RaceCard({ race, isNext }) {
 
   useEffect(() => {
     if (!expanded || !race.Circuit?.Location) return;
-    
+
     const raceDate = new Date(race.date);
     const today = new Date();
-    
+
     // Find the Monday of the race week (0 = Sunday, 6 = Saturday)
     const day = raceDate.getDay();
     const offset = day === 0 ? -6 : 1 - day;
     const raceWeekMonday = new Date(raceDate.getFullYear(), raceDate.getMonth(), raceDate.getDate() + offset);
-    
+
     // Reset times to midnight local time for accurate calendar day calculations
     const d1 = new Date(raceWeekMonday.getFullYear(), raceWeekMonday.getMonth(), raceWeekMonday.getDate());
     const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const dRace = new Date(raceDate.getFullYear(), raceDate.getMonth(), raceDate.getDate());
-    
+
     const diffToMonday = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
     const diffToRace = Math.round((dRace - d2) / (1000 * 60 * 60 * 24));
-    
+
     // Only fetch weather if today is Monday of the race week or later, and the race isn't more than 3 days in the past
     if (diffToMonday > 0 || diffToRace < -3) return;
 
@@ -242,10 +242,10 @@ export default function RaceCard({ race, isNext }) {
   const findNearestWeather = (sessionTime) => {
     if (!sessionTime || !weatherData || !weatherData.time) return null;
     const targetMs = sessionTime.getTime();
-    
+
     let bestIdx = -1;
     let minDiff = Infinity;
-    
+
     for (let i = 0; i < weatherData.time.length; i++) {
       const forecastDate = new Date(weatherData.time[i]);
       const diff = Math.abs(forecastDate.getTime() - targetMs);
@@ -254,12 +254,12 @@ export default function RaceCard({ race, isNext }) {
         bestIdx = i;
       }
     }
-    
+
     // Match only if the weather forecast is within 3 hours of the session time
     if (minDiff < 3 * 60 * 60 * 1000 && bestIdx !== -1) {
       const airTemp = weatherData.temperature_2m[bestIdx];
       const code = weatherData.weather_code[bestIdx];
-      
+
       let trackTempDiff = 5;
       if ([0, 1].includes(code)) trackTempDiff = 13;
       else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) trackTempDiff = -2;
@@ -282,20 +282,20 @@ export default function RaceCard({ race, isNext }) {
 
   const getSessionState = (name, rawTime) => {
     if (!now || !rawTime) return 'future';
-    
+
     const startTime = new Date(rawTime);
     const lowerName = name.toLowerCase();
-    
+
     let durationMs = 1 * 60 * 60 * 1000; // Default: 1 hour (Practice sessions)
-    
+
     if (lowerName.includes('qualifying') || lowerName.includes('sprint')) {
       durationMs = 1.5 * 60 * 60 * 1000; // 1.5 hours
     } else if (lowerName === 'race') {
       durationMs = 3 * 60 * 60 * 1000; // 3 hours (Main race maximum absolute limit)
     }
-    
+
     const endTime = new Date(startTime.getTime() + durationMs);
-    
+
     if (now > endTime) {
       return 'completed';
     } else if (now >= startTime && now <= endTime) {
@@ -305,11 +305,11 @@ export default function RaceCard({ race, isNext }) {
     }
   };
 
-  const circuit = circuitData[race.Circuit.circuitId] || { 
-    color: "rgba(50, 50, 50, 1)", 
-    image: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&q=80&w=800" 
+  const circuit = circuitData[race.Circuit.circuitId] || {
+    color: "rgba(50, 50, 50, 1)",
+    image: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&q=80&w=800"
   };
-  
+
   const baseColor = isNext ? "rgba(225, 6, 0, 1)" : circuit.color;
 
   useEffect(() => {
@@ -348,7 +348,7 @@ export default function RaceCard({ race, isNext }) {
     if (race.Sprint) addSession('Sprint', race.Sprint.date, race.Sprint.time);
     if (race.Qualifying) addSession('Qualifying', race.Qualifying.date, race.Qualifying.time);
     addSession('Race', race.date, race.time, true);
-    
+
     const timeout = setTimeout(() => {
       setSessions(s);
     }, 0);
@@ -363,7 +363,7 @@ export default function RaceCard({ race, isNext }) {
 
   const fadedColor = baseColor.replace('1)', '0.85)');
   const transparentColor = baseColor.replace('1)', '0)');
-  
+
   const cardStyle = {
     backgroundImage: `linear-gradient(90deg, ${baseColor} 0%, ${fadedColor} 50%, ${transparentColor} 100%), url('${circuit.image}')`,
     backgroundSize: 'cover',
@@ -382,7 +382,7 @@ export default function RaceCard({ race, isNext }) {
             <h2 className={styles.raceName}>{race.raceName}</h2>
             <p className={styles.circuit}>{race.Circuit.circuitName}</p>
           </div>
-          
+
           {isNext && (
             <div className={styles.countdownContainer}>
               <Countdown targetDate={raceDate} />
@@ -398,113 +398,113 @@ export default function RaceCard({ race, isNext }) {
         </div>
 
         {expanded && (
-        <div className={styles.sessionsList}>
-          {sessions.map((session, idx) => {
-            const state = getSessionState(session.name, session.rawTime);
-            const isCompleted = state === 'completed';
-            const isLive = state === 'live';
-            const weather = findNearestWeather(session.rawTime);
-            
-            return (
-              <div 
-                key={idx} 
-                className={`${styles.sessionItem} ${session.isMain ? styles.mainSession : ''} ${isCompleted ? styles.completedSession : ''} ${isLive ? styles.liveSession : ''}`}
-              >
-                <div className={styles.sessionNameContainer}>
-                  <span className={styles.sessionName}>{session.name}</span>
-                  {isLive && (
-                    <span className={styles.liveBadge}>
-                      Live
-                      <span className={styles.liveDot}></span>
-                    </span>
-                  )}
-                </div>
-                <div className={styles.sessionTimeContainer}>
-                  <span className={styles.sessionTime}>{session.formattedTime}</span>
-                  {weather && (
-                    <div className={styles.weatherIconContainer}>
-                      <WeatherIcon code={weather.code} />
-                      <div className={styles.weatherTooltip}>
-                        <div className={styles.tooltipTitle}>{session.name} Weather</div>
-                        <div className={styles.tooltipConfidence} style={{
-                          color: weather.confidence === 'Live Forecast' ? '#39ff14' : '#ffe600'
-                        }}>
-                          {weather.confidence === 'Live Forecast' ? '● Live Forecast' : '▲ Early Outlook'}
-                        </div>
-                        <div className={styles.tooltipGrid}>
-                          <div className={styles.tooltipItem}>
-                            <span>Air Temp</span>
-                            <strong>{weather.temp}°C</strong>
+          <div className={styles.sessionsList}>
+            {sessions.map((session, idx) => {
+              const state = getSessionState(session.name, session.rawTime);
+              const isCompleted = state === 'completed';
+              const isLive = state === 'live';
+              const weather = findNearestWeather(session.rawTime);
+
+              return (
+                <div
+                  key={idx}
+                  className={`${styles.sessionItem} ${session.isMain ? styles.mainSession : ''} ${isCompleted ? styles.completedSession : ''} ${isLive ? styles.liveSession : ''}`}
+                >
+                  <div className={styles.sessionNameContainer}>
+                    <span className={styles.sessionName}>{session.name}</span>
+                    {isLive && (
+                      <span className={styles.liveBadge}>
+                        Live
+                        <span className={styles.liveDot}></span>
+                      </span>
+                    )}
+                  </div>
+                  <div className={styles.sessionTimeContainer}>
+                    <span className={styles.sessionTime}>{session.formattedTime}</span>
+                    {weather && (
+                      <div className={styles.weatherIconContainer}>
+                        <WeatherIcon code={weather.code} />
+                        <div className={styles.weatherTooltip}>
+                          <div className={styles.tooltipTitle}>{session.name} Weather</div>
+                          <div className={styles.tooltipConfidence} style={{
+                            color: weather.confidence === 'Live Forecast' ? '#39ff14' : '#ffe600'
+                          }}>
+                            {weather.confidence === 'Live Forecast' ? '● Live Forecast' : '▲ Early Outlook'}
                           </div>
-                          <div className={styles.tooltipItem}>
-                            <span>Track Temp</span>
-                            <strong>{weather.trackTemp}°C</strong>
-                          </div>
-                          <div className={styles.tooltipItem}>
-                            <span>Humidity</span>
-                            <strong>{weather.humidity}%</strong>
-                          </div>
-                          <div className={styles.tooltipItem}>
-                            <span>Rain Prob</span>
-                            <strong>{weather.rainProb}%</strong>
+                          <div className={styles.tooltipGrid}>
+                            <div className={styles.tooltipItem}>
+                              <span>Air Temp</span>
+                              <strong>{weather.temp}°C</strong>
+                            </div>
+                            <div className={styles.tooltipItem}>
+                              <span>Track Temp</span>
+                              <strong>{weather.trackTemp}°C</strong>
+                            </div>
+                            <div className={styles.tooltipItem}>
+                              <span>Humidity</span>
+                              <strong>{weather.humidity}%</strong>
+                            </div>
+                            <div className={styles.tooltipItem}>
+                              <span>Rain Prob</span>
+                              <strong>{weather.rainProb}%</strong>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Add to Calendar Button */}
-                  {!isCompleted && session.rawTime && (
-                    <div className={styles.calendarContainer}>
-                      <button 
-                        className={styles.calendarBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCalendarIndex(activeCalendarIndex === idx ? null : idx);
-                        }}
-                        title="Add to Calendar"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                          <line x1="16" y1="2" x2="16" y2="6" />
-                          <line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
-                          <line x1="12" y1="14" x2="12" y2="18" />
-                          <line x1="10" y1="16" x2="14" y2="16" />
-                        </svg>
-                      </button>
-                      
-                      {activeCalendarIndex === idx && (
-                        <div className={styles.calendarPopover} onClick={(e) => e.stopPropagation()}>
-                          <div className={styles.popoverTitle}>Add to Calendar</div>
-                          <a 
-                            href={getGoogleCalendarLink(session, race)} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className={styles.popoverItem}
-                            onClick={() => setActiveCalendarIndex(null)}
-                          >
-                            Google Calendar
-                          </a>
-                          <button 
-                            className={styles.popoverItem}
-                            onClick={() => {
-                              downloadIcsFile(session, race);
-                              setActiveCalendarIndex(null);
-                            }}
-                          >
-                            iCal / Outlook (.ics)
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {/* Add to Calendar Button */}
+                    {!isCompleted && session.rawTime && (
+                      <div className={styles.calendarContainer}>
+                        <button
+                          className={styles.calendarBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveCalendarIndex(activeCalendarIndex === idx ? null : idx);
+                          }}
+                          title="Add to Calendar"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                            <line x1="12" y1="14" x2="12" y2="18" />
+                            <line x1="10" y1="16" x2="14" y2="16" />
+                          </svg>
+                        </button>
+
+                        {activeCalendarIndex === idx && (
+                          <div className={styles.calendarPopover} onClick={(e) => e.stopPropagation()}>
+                            <div className={styles.popoverTitle}>Add to Calendar</div>
+                            <a
+                              href={getGoogleCalendarLink(session, race)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.popoverItem}
+                              onClick={() => setActiveCalendarIndex(null)}
+                            >
+                              Google Calendar
+                            </a>
+                            <button
+                              className={styles.popoverItem}
+                              onClick={() => {
+                                downloadIcsFile(session, race);
+                                setActiveCalendarIndex(null);
+                              }}
+                            >
+                              iCal / Outlook (.ics)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
