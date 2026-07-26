@@ -44,7 +44,7 @@ export default function Results() {
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Formula 1 Results</h1>
-          <p className={styles.subtitle}>Completed races from the current season.</p>
+          <p className={styles.subtitle}>Race weekends from the current season - session results appear as soon as each session finishes.</p>
         </div>
         <div className={styles.controls}>
           <label className={styles.label}>Order:</label>
@@ -63,7 +63,7 @@ export default function Results() {
       
       <div className="race-list">
         {sortedResults.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No completed races yet for this season.</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No race weekends have started yet this season.</div>
         ) : (
           sortedResults.map((race) => (
             <ResultCard 

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import styles from './ResultCard.module.css';
 import { circuitData } from '@/lib/circuitData';
 import TelemetryDashboard from './TelemetryDashboard';
+import { getSessionState, getLatestCompletedResultsSession } from '@/lib/sessionUtils';
 
 const ChevronIcon = ({ expanded }) => (
   <svg 
@@ -70,6 +71,15 @@ export default function ResultCard({ race }) {
   const initialResults = race.Results || [];
   const podium = initialResults.slice(0, 3);
 
+  // Race results (and telemetry, which is derived from race results) should
+  // only surface once the race session itself has actually finished - not
+  // just when the round appears in the list, since quali/sprint results can
+  // be available well before the race is run.
+  const raceStart = race.date ? new Date(`${race.date}T${race.time || '00:00:00Z'}`) : null;
+  const raceState = raceStart ? getSessionState('Race', raceStart) : 'future';
+  const raceCompleted = raceState === 'completed';
+  const latestCompletedSession = getLatestCompletedResultsSession(race);
+
   const handleExpand = async () => {
     const newExpanded = !expanded;
     setExpanded(newExpanded);
@@ -81,9 +91,13 @@ export default function ResultCard({ race }) {
         if (!res.ok) throw new Error('Failed to fetch session data');
         const data = await res.json();
         setSessionData(data);
-        if (!data.results?.length) {
+        // Default to the race tab only once the race session has actually
+        // finished; otherwise land on whichever completed session has data.
+        if (!raceCompleted || !data.results?.length) {
            if (data.sprint?.length) {
              setActiveTab('sprint');
+           } else if (data.qualifying?.length) {
+             setActiveTab('qualifying');
            } else if (data.sprintQualifying?.length) {
              setActiveTab('sprintQuali');
            }
@@ -146,7 +160,7 @@ export default function ResultCard({ race }) {
           <p className={styles.circuit}>{race.Circuit.circuitName}</p>
         </div>
         
-        {podium.length > 0 && (
+        {podium.length > 0 ? (
           <div className={styles.podiumPreview}>
             {podium.map(driver => (
               <div key={driver.position} className={`${styles.podiumItem} ${styles['p' + driver.position]}`}>
@@ -157,6 +171,15 @@ export default function ResultCard({ race }) {
                 </div>
               </div>
             ))}
+          </div>
+        ) : (raceState === 'live' || latestCompletedSession) && (
+          <div className={styles.podiumPreview}>
+            <div style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+              {raceState === 'live' ? 'Race in progress' : `${latestCompletedSession} complete`}
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem' }}>
+              Tap to view results
+            </div>
           </div>
         )}
       </div>
@@ -175,12 +198,14 @@ export default function ResultCard({ race }) {
           ) : sessionData ? (
             <>
               <div className={styles.tabs}>
-                <button 
-                  className={`${styles.tabBtn} ${activeTab === 'race' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('race')}
-                >
-                  Race
-                </button>
+                {raceCompleted && (sessionData.results?.length > 0 || initialResults.length > 0) && (
+                  <button
+                    className={`${styles.tabBtn} ${activeTab === 'race' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('race')}
+                  >
+                    Race
+                  </button>
+                )}
                 {sessionData.sprint?.length > 0 && (
                   <button 
                     className={`${styles.tabBtn} ${activeTab === 'sprint' ? styles.activeTab : ''}`}
@@ -205,15 +230,22 @@ export default function ResultCard({ race }) {
                     Sprint Qualifying
                   </button>
                 )}
-                <button 
-                  className={`${styles.tabBtn} ${activeTab === 'telemetry' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('telemetry')}
-                >
-                  Telemetry Insights
-                </button>
+                {raceCompleted && (sessionData.results?.length > 0 || initialResults.length > 0) && (
+                  <button
+                    className={`${styles.tabBtn} ${activeTab === 'telemetry' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('telemetry')}
+                  >
+                    Telemetry Insights
+                  </button>
+                )}
               </div>
               
               <div className={styles.tabContent}>
+                {!raceCompleted && !sessionData.sprint?.length && !sessionData.qualifying?.length && !sessionData.sprintQualifying?.length && (
+                  <div style={{ padding: '1rem', color: 'var(--text-muted)' }}>
+                    Session results aren&apos;t published yet - check back once the next session wraps up.
+                  </div>
+                )}
                 {activeTab === 'race' && renderTable(sessionData.results || initialResults, false)}
                 {activeTab === 'sprint' && renderTable(sessionData.sprint, false)}
                 {activeTab === 'qualifying' && renderTable(sessionData.qualifying, true)}

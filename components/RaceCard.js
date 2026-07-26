@@ -4,6 +4,7 @@ import styles from './RaceCard.module.css';
 import Countdown from './Countdown';
 import Image from 'next/image';
 import { circuitData } from '@/lib/circuitData';
+import { getSessionState as getSharedSessionState, getSessionEndTime } from '@/lib/sessionUtils';
 
 const ChevronIcon = ({ expanded }) => (
   <svg
@@ -116,14 +117,7 @@ export default function RaceCard({ race, isNext }) {
   const getSessionTimes = (sessionName, rawTime) => {
     if (!rawTime) return null;
     const start = new Date(rawTime);
-    const lowerName = sessionName.toLowerCase();
-    let durationMs = 1 * 60 * 60 * 1000; // 1 hour for Practice
-    if (lowerName.includes('qualifying') || lowerName.includes('sprint')) {
-      durationMs = 1.5 * 60 * 60 * 1000;
-    } else if (lowerName === 'race') {
-      durationMs = 3 * 60 * 60 * 1000;
-    }
-    const end = new Date(start.getTime() + durationMs);
+    const end = getSessionEndTime(start, sessionName);
     return { start, end };
   };
 
@@ -294,27 +288,7 @@ export default function RaceCard({ race, isNext }) {
 
   const getSessionState = (name, rawTime) => {
     if (!now || !rawTime) return 'future';
-
-    const startTime = new Date(rawTime);
-    const lowerName = name.toLowerCase();
-
-    let durationMs = 1 * 60 * 60 * 1000; // Default: 1 hour (Practice sessions)
-
-    if (lowerName.includes('qualifying') || lowerName.includes('sprint')) {
-      durationMs = 1.5 * 60 * 60 * 1000; // 1.5 hours
-    } else if (lowerName === 'race') {
-      durationMs = 3 * 60 * 60 * 1000; // 3 hours (Main race maximum absolute limit)
-    }
-
-    const endTime = new Date(startTime.getTime() + durationMs);
-
-    if (now > endTime) {
-      return 'completed';
-    } else if (now >= startTime && now <= endTime) {
-      return 'live';
-    } else {
-      return 'future';
-    }
+    return getSharedSessionState(name, rawTime, now);
   };
 
   const circuit = circuitData[race.Circuit.circuitId] || {
