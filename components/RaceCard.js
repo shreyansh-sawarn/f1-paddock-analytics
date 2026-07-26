@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './RaceCard.module.css';
 import Countdown from './Countdown';
 import Image from 'next/image';
@@ -89,15 +89,27 @@ export default function RaceCard({ race, isNext }) {
   const [now, setNow] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const [activeCalendarIndex, setActiveCalendarIndex] = useState(null);
+  const activeCalendarRef = useRef(null);
 
-  // Close calendar popover on click outside
+  // Close calendar popover on click outside.
+  // On mobile (browser + PWA), the tap that opens the popover can otherwise
+  // also be seen by this listener and immediately close it again, making the
+  // first tap look like it did nothing. Guarding with a containment check
+  // (instead of closing on any click) fixes that race.
   useEffect(() => {
     if (activeCalendarIndex === null) return;
-    const handleOutsideClick = () => {
+    const handleOutsideClick = (event) => {
+      if (activeCalendarRef.current && activeCalendarRef.current.contains(event.target)) {
+        return;
+      }
       setActiveCalendarIndex(null);
     };
-    window.addEventListener('click', handleOutsideClick);
-    return () => window.removeEventListener('click', handleOutsideClick);
+    document.addEventListener('click', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
   }, [activeCalendarIndex]);
 
   // Session duration logic
@@ -455,7 +467,12 @@ export default function RaceCard({ race, isNext }) {
 
                     {/* Add to Calendar Button */}
                     {!isCompleted && session.rawTime && (
-                      <div className={styles.calendarContainer}>
+                      <div
+                        className={styles.calendarContainer}
+                        ref={(el) => {
+                          if (activeCalendarIndex === idx) activeCalendarRef.current = el;
+                        }}
+                      >
                         <button
                           className={styles.calendarBtn}
                           onClick={(e) => {
