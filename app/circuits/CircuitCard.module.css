@@ -6,6 +6,109 @@
   cursor: pointer;
 }
 
+/* Featured card (upcoming / live race weekend) — spans two grid columns and
+   sits taller so it visually anchors the top of the page. */
+.featuredContainer {
+  grid-column: span 2;
+  height: 520px;
+}
+
+@media (max-width: 900px) {
+  .featuredContainer {
+    grid-column: span 1;
+    height: 460px;
+  }
+}
+
+.featuredContainer .mapContainer {
+  height: 320px;
+  padding: 1rem;
+}
+
+.featuredContainer .svgMap {
+  max-height: 290px;
+}
+
+.featuredContainer .cardFront {
+  animation: featuredGlowPulse 2.6s ease-in-out infinite;
+  border-width: 2px;
+  border-color: var(--circuit-color);
+}
+
+@keyframes featuredGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 18px -4px var(--circuit-color), 0 4px 20px -8px var(--circuit-color);
+  }
+  50% {
+    box-shadow: 0 0 36px 2px var(--circuit-color), 0 10px 32px -6px var(--circuit-color);
+  }
+}
+
+.featuredBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(90deg, var(--circuit-color) 0%, rgba(10, 10, 12, 0.55) 130%);
+  color: #fff;
+  position: relative;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.featuredBannerLive {
+  background: linear-gradient(90deg, #39ff14 0%, rgba(10, 10, 12, 0.55) 130%);
+}
+
+.featuredBadge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.featuredRaceName {
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.featuredCountdown {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-block;
+  animation: livePulseDot 1s ease-in-out infinite alternate;
+}
+
+@keyframes livePulseDot {
+  from { opacity: 0.4; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+
 .cardInner {
   position: relative;
   width: 100%;
@@ -16,6 +119,16 @@
 
 .cardContainer:hover .cardInner:not(.isFlipped) {
   transform: translateY(-4px) rotateX(2deg) rotateY(2deg);
+}
+
+/* The base hover tilt above is tuned for a ~300-380px wide card. On the
+   featured card (double-width, spans 2 grid columns) that same couple of
+   degrees of rotation displaces the far edges dramatically under the
+   perspective transform, making the card look like it's skewing/protruding
+   out to one side. Keep the lift, drop the 3D tilt. Must come after the base
+   rule above so equal-specificity cascade order favors this override. */
+.featuredContainer:hover .cardInner:not(.isFlipped) {
+  transform: translateY(-4px);
 }
 
 /* Disable 3D tilting movement when hovering interactive elements to prevent layout shift from causing click misses */

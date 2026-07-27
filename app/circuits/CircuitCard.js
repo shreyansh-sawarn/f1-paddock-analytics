@@ -52,7 +52,7 @@ const getSectorData = (circuitId, sector) => {
   return data[circuitId]?.[sector] || fallback[sector];
 };
 
-export default function CircuitCard({ circuitId, circuit, svgUrl }) {
+export default function CircuitCard({ circuitId, circuit, svgUrl, isFeatured = false, raceInfo = null, isLiveWeekend = false }) {
   const [flipped, setFlipped] = useState(false);
   const [activeSector, setActiveSector] = useState(null); // null, 1, 2, 3, 'drs'
   const [showHud, setShowHud] = useState(false);
@@ -66,6 +66,35 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
   const [lapProgress, setLapProgress] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(0);
   const [carPos, setCarPos] = useState(null);
+
+  // Compact "next race" countdown for the featured banner (d/h/m only — no
+  // seconds ticker, since this is a small badge rather than a hero clock).
+  const [countdownText, setCountdownText] = useState(null);
+
+  useEffect(() => {
+    if (!isFeatured || !raceInfo || isLiveWeekend) {
+      setCountdownText(null);
+      return;
+    }
+
+    const target = new Date(`${raceInfo.date}T${raceInfo.time || '00:00:00Z'}`).getTime();
+
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        setCountdownText('Starting now');
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      setCountdownText(days > 0 ? `${days}d ${hours}h ${minutes}m` : `${hours}h ${minutes}m`);
+    };
+
+    tick();
+    const interval = setInterval(tick, 60000);
+    return () => clearInterval(interval);
+  }, [isFeatured, raceInfo, isLiveWeekend]);
 
   useEffect(() => {
     if (svgUrl) {
@@ -182,15 +211,30 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
   const sectorInfo = activeSector ? getSectorData(circuitId, activeSector) : null;
 
   return (
-    <div 
-      className={styles.cardContainer} 
+    <div
+      className={`${styles.cardContainer} ${isFeatured ? styles.featuredContainer : ''}`}
       onClick={() => setFlipped(!flipped)}
       style={{ '--circuit-color': circuit.color || 'var(--f1-red)' }}
     >
       <div className={`${styles.cardInner} ${flipped ? styles.isFlipped : ''}`}>
-        
+
         {/* Front Face */}
         <div className={styles.cardFront}>
+          {isFeatured && raceInfo && (
+            <div className={`${styles.featuredBanner} ${isLiveWeekend ? styles.featuredBannerLive : ''}`}>
+              <span className={styles.featuredBadge}>
+                {isLiveWeekend ? (
+                  <>Race Week <span className={styles.liveDot} /></>
+                ) : (
+                  'Next Race'
+                )}
+              </span>
+              <span className={styles.featuredRaceName}>{raceInfo.raceName}</span>
+              {!isLiveWeekend && countdownText && (
+                <span className={styles.featuredCountdown}>{countdownText}</span>
+              )}
+            </div>
+          )}
           <div className={styles.mapContainer}>
             {svgPaths.length > 0 ? (
               <div className={styles.svgWrapper}>
@@ -383,6 +427,14 @@ export default function CircuitCard({ circuitId, circuit, svgUrl }) {
               <div className={styles.statBox}>
                 <span className={styles.statLabel}>Quali Record</span>
                 <span className={styles.statValue}>{circuit.qualiRecord || 'N/A'}</span>
+              </div>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>First Grand Prix</span>
+                <span className={styles.statValue}>{circuit.firstGp || 'N/A'}</span>
+              </div>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Direction</span>
+                <span className={styles.statValue}>{circuit.direction || 'N/A'}</span>
               </div>
             </div>
 
