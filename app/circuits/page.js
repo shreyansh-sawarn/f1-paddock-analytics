@@ -76,7 +76,7 @@ export default function CircuitsPage() {
       <header className={styles.header}>
         <div className={styles.headerText}>
           <h1 className={styles.title}>Track Maps</h1>
-          <p className={styles.subtitle}>Explore the official SVG layouts and statistics for the current circuit calendar.</p>
+          <p className={styles.subtitle}>Explore official SVG layouts and statistics for circuits past and present.</p>
         </div>
       </header>
 
