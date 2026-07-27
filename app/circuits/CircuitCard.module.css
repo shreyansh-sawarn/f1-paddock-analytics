@@ -382,7 +382,7 @@
   filter: drop-shadow(0 0 4px rgba(255, 0, 127, 0.6));
 }
 
-.highlightDrs {
+.highlightOvertake {
   stroke: #39ff14;
   filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.6));
 }
@@ -513,7 +513,7 @@
 .activeS1 { background-color: rgba(0, 240, 255, 0.12) !important; border-color: #00f0ff !important; color: #00f0ff !important; box-shadow: 0 0 6px rgba(0, 240, 255, 0.25); }
 .activeS2 { background-color: rgba(255, 230, 0, 0.12) !important; border-color: #ffe600 !important; color: #ffe600 !important; box-shadow: 0 0 6px rgba(255, 230, 0, 0.25); }
 .activeS3 { background-color: rgba(255, 0, 127, 0.12) !important; border-color: #ff007f !important; color: #ff007f !important; box-shadow: 0 0 6px rgba(255, 0, 127, 0.25); }
-.activeDrs { background-color: rgba(57, 255, 20, 0.12) !important; border-color: #39ff14 !important; color: #39ff14 !important; box-shadow: 0 0 6px rgba(57, 255, 20, 0.25); }
+.activeOvertake { background-color: rgba(57, 255, 20, 0.12) !important; border-color: #39ff14 !important; color: #39ff14 !important; box-shadow: 0 0 6px rgba(57, 255, 20, 0.25); }
 
 .playPill {
   background: var(--badge-bg);
