@@ -70,6 +70,24 @@ export default function ResultCard({ race }) {
   const initialResults = race.Results || [];
   const podium = initialResults.slice(0, 3);
 
+  // Whether the race itself has genuinely published results - and therefore
+  // whether Race/Telemetry should be selectable at all. This comes straight
+  // from the /api/results flags (themselves backed by actual Ergast data or
+  // an OpenF1 chequered-flag check), not a guessed session duration, so a
+  // red-flagged/rain-delayed session can't get misclassified as done early.
+  const hasRaceResults = race.hasRaceResults ?? initialResults.length > 0;
+
+  // For the collapsed-card status badge: which session most recently
+  // finished, in rough chronological priority (Qualifying is the last
+  // non-race session on both normal and sprint weekends).
+  const latestCompletedSessionLabel = race.hasQualifying
+    ? 'Qualifying'
+    : race.hasSprint
+    ? 'Sprint'
+    : race.hasSprintQualifying
+    ? 'Sprint Qualifying'
+    : null;
+
   const handleExpand = async () => {
     const newExpanded = !expanded;
     setExpanded(newExpanded);
@@ -81,9 +99,13 @@ export default function ResultCard({ race }) {
         if (!res.ok) throw new Error('Failed to fetch session data');
         const data = await res.json();
         setSessionData(data);
+        // Default to the race tab only if it actually has data; otherwise
+        // land on whichever completed session has data.
         if (!data.results?.length) {
            if (data.sprint?.length) {
              setActiveTab('sprint');
+           } else if (data.qualifying?.length) {
+             setActiveTab('qualifying');
            } else if (data.sprintQualifying?.length) {
              setActiveTab('sprintQuali');
            }
@@ -146,7 +168,7 @@ export default function ResultCard({ race }) {
           <p className={styles.circuit}>{race.Circuit.circuitName}</p>
         </div>
         
-        {podium.length > 0 && (
+        {podium.length > 0 ? (
           <div className={styles.podiumPreview}>
             {podium.map(driver => (
               <div key={driver.position} className={`${styles.podiumItem} ${styles['p' + driver.position]}`}>
@@ -157,6 +179,15 @@ export default function ResultCard({ race }) {
                 </div>
               </div>
             ))}
+          </div>
+        ) : latestCompletedSessionLabel && (
+          <div className={styles.podiumPreview}>
+            <div style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+              {`${latestCompletedSessionLabel} complete`}
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem' }}>
+              Tap to view results
+            </div>
           </div>
         )}
       </div>
@@ -175,12 +206,14 @@ export default function ResultCard({ race }) {
           ) : sessionData ? (
             <>
               <div className={styles.tabs}>
-                <button 
-                  className={`${styles.tabBtn} ${activeTab === 'race' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('race')}
-                >
-                  Race
-                </button>
+                {(sessionData.results?.length > 0 || initialResults.length > 0) && (
+                  <button
+                    className={`${styles.tabBtn} ${activeTab === 'race' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('race')}
+                  >
+                    Race
+                  </button>
+                )}
                 {sessionData.sprint?.length > 0 && (
                   <button 
                     className={`${styles.tabBtn} ${activeTab === 'sprint' ? styles.activeTab : ''}`}
@@ -205,15 +238,22 @@ export default function ResultCard({ race }) {
                     Sprint Qualifying
                   </button>
                 )}
-                <button 
-                  className={`${styles.tabBtn} ${activeTab === 'telemetry' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('telemetry')}
-                >
-                  Telemetry Insights
-                </button>
+                {(sessionData.results?.length > 0 || initialResults.length > 0) && (
+                  <button
+                    className={`${styles.tabBtn} ${activeTab === 'telemetry' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('telemetry')}
+                  >
+                    Telemetry Insights
+                  </button>
+                )}
               </div>
               
               <div className={styles.tabContent}>
+                {!hasRaceResults && !sessionData.results?.length && !sessionData.sprint?.length && !sessionData.qualifying?.length && !sessionData.sprintQualifying?.length && (
+                  <div style={{ padding: '1rem', color: 'var(--text-muted)' }}>
+                    Session results aren&apos;t published yet - check back once the next session wraps up.
+                  </div>
+                )}
                 {activeTab === 'race' && renderTable(sessionData.results || initialResults, false)}
                 {activeTab === 'sprint' && renderTable(sessionData.sprint, false)}
                 {activeTab === 'qualifying' && renderTable(sessionData.qualifying, true)}
