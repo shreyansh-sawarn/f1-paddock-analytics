@@ -152,7 +152,6 @@ export default function Sidebar({ isCollapsed, toggleCollapse }) {
 
         <div className={styles.footer}>
           <span className={styles.footerText}>Made with ❤️ by Shreyansh.</span>
-          <span className={styles.footerHeart}>❤️</span>
         </div>
       </aside>
 
