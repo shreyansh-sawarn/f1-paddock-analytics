@@ -99,3 +99,14 @@
 .mobileFooter {
   display: none;
 }
+
+/* Mirrors the logo: when the sidebar collapses, the credit moves here */
+.desktopFooter {
+  display: block;
+  text-align: center;
+  padding: 1.5rem 2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: auto;
+  animation: fadeIn 0.25s ease-out;
+}
