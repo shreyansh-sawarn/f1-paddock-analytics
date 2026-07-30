@@ -121,6 +121,24 @@ export default function RaceCard({ race, isNext }) {
     return { start, end };
   };
 
+  // On Android, our installed PWA counts as a separate "app" handing off a URL,
+  // so Android's App Links resolve calendar.google.com to whatever native calendar
+  // app is registered for it instead of opening the page in Chrome. If that app
+  // hasn't finished loading its calendar list yet (cold start), it shows "no
+  // calendar has been synchronised with this device yet" instead of adding the
+  // event — which is also why it works fine once that app is already warm.
+  // Regular browser tabs don't hit this because Chrome doesn't App-Link-hijack
+  // navigation that's already happening inside itself.
+  // Explicitly targeting the Chrome package via an intent:// URI bypasses that
+  // App Links resolution and forces the link open in the browser instead.
+  const buildCalendarNavUrl = (url) => {
+    if (typeof navigator === 'undefined' || !/Android/i.test(navigator.userAgent)) {
+      return url;
+    }
+    const withoutScheme = url.replace(/^https?:\/\//, '');
+    return `intent://${withoutScheme}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+  };
+
   // Google Calendar link builder
   const getGoogleCalendarLink = (session, race) => {
     const times = getSessionTimes(session.name, session.rawTime);
@@ -468,15 +486,24 @@ export default function RaceCard({ race, isNext }) {
                         {activeCalendarIndex === idx && (
                           <div className={styles.calendarPopover} onClick={(e) => e.stopPropagation()}>
                             <div className={styles.popoverTitle}>Add to Calendar</div>
-                            <a
-                              href={getGoogleCalendarLink(session, race)}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
                               className={styles.popoverItem}
-                              onClick={() => setActiveCalendarIndex(null)}
+                              onClick={() => {
+                                const rawUrl = getGoogleCalendarLink(session, race);
+                                const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+                                if (isAndroid) {
+                                  // Top-level navigation so Chrome intercepts the
+                                  // intent:// URI itself; window.open doesn't reliably
+                                  // resolve this scheme.
+                                  window.location.href = buildCalendarNavUrl(rawUrl);
+                                } else {
+                                  window.open(rawUrl, '_blank', 'noopener,noreferrer');
+                                }
+                                setActiveCalendarIndex(null);
+                              }}
                             >
                               Google Calendar
-                            </a>
+                            </button>
                             <button
                               className={styles.popoverItem}
                               onClick={() => {
