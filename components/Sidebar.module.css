@@ -19,7 +19,8 @@
 }
 
 .logoContainer {
-  padding: 0 1rem 2rem 1.5rem;
+  padding: 0 0.75rem 2rem 1.25rem;
+  gap: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -31,23 +32,25 @@
   align-items: center;
   gap: 0.5rem;
   transition: opacity 0.25s ease, max-width 0.25s ease, gap 0.25s ease;
-  max-width: 220px;
+  min-width: 0;
+  max-width: 240px;
   opacity: 1;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .logoText {
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--f1-dark);
   text-transform: uppercase;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   margin: 0;
   line-height: 1;
 }
 
 .lightsContainer {
   display: flex;
+  flex-shrink: 0;
   gap: 2px;
   background-color: #1a1a1a;
   padding: 5px 6px;
@@ -78,6 +81,7 @@
   transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
   outline: none;
   border: 1px solid transparent;
+  flex-shrink: 0;
 }
 
 .collapseBtn:hover {
@@ -183,20 +187,12 @@
 }
 
 .footerText {
-  transition: opacity 0.25s ease;
+  display: inline-block;
+  transition: opacity 0.25s ease, max-width 0.25s ease;
   opacity: 1;
-  display: block;
-}
-
-.footerHeart {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: opacity 0.25s ease;
-  opacity: 0;
-  pointer-events: none;
-  font-size: 1.1rem;
+  max-width: 240px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* COLLAPSED STATE STYLES */
@@ -258,11 +254,8 @@
 
 .sidebar.collapsed .footerText {
   opacity: 0;
+  max-width: 0;
   pointer-events: none;
-}
-
-.sidebar.collapsed .footerHeart {
-  opacity: 1;
 }
 
 .sidebar.collapsed .footer {
