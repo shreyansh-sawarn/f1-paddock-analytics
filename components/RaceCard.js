@@ -6,6 +6,16 @@ import Image from 'next/image';
 import { circuitData } from '@/lib/circuitData';
 import { getSessionState as getSharedSessionState, getSessionEndTime } from '@/lib/sessionUtils';
 
+// Since iPadOS 13, Safari sends a desktop-class user agent (reports as "Macintosh")
+// with no "iPad" substring, so UA sniffing alone misses iPads. Real Macs are not
+// touch-capable, so a touch-capable "MacIntel" is reliably an iPad.
+const isIOSDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  return /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
 const ChevronIcon = ({ expanded }) => (
   <svg
     width="16"
@@ -149,7 +159,7 @@ export default function RaceCard({ race, isNext }) {
 
     const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     const isAndroid = /Android/i.test(ua);
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isIOS = isIOSDevice();
 
     if (isAndroid) {
       // Build a Calendar INSERT intent URI. Android's intent filter for
@@ -219,7 +229,7 @@ export default function RaceCard({ race, isNext }) {
 
   // iCal/ICS — opens directly in Apple Calendar on iOS, downloads .ics
   // file on Android/desktop (for Outlook, Google Calendar import, etc.).
-  const downloadIcsFile = (session, race) => {
+  const openIcsCalendar = (session, race) => {
     const times = getSessionTimes(session.name, session.rawTime);
     if (!times) return;
 
@@ -252,7 +262,7 @@ export default function RaceCard({ race, isNext }) {
     ];
 
     const icsContent = icsLines.join("\r\n");
-    const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isIOS = isIOSDevice();
 
     if (isIOS) {
       // On iOS, the <a download> pattern just dumps the file into the Files
@@ -572,7 +582,7 @@ export default function RaceCard({ race, isNext }) {
                             <button
                               className={styles.popoverItem}
                               onClick={() => {
-                                downloadIcsFile(session, race);
+                                openIcsCalendar(session, race);
                                 setActiveCalendarIndex(null);
                               }}
                             >
