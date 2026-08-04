@@ -127,16 +127,77 @@ export default function RaceCard({ race, isNext }) {
   // hasn't finished loading its calendar list yet (cold start), it shows "no
   // calendar has been synchronised with this device yet" instead of adding the
   // event — which is also why it works fine once that app is already warm.
-  // Regular browser tabs don't hit this because Chrome doesn't App-Link-hijack
-  // navigation that's already happening inside itself.
-  // Explicitly targeting the Chrome package via an intent:// URI bypasses that
-  // App Links resolution and forces the link open in the browser instead.
-  const buildCalendarNavUrl = (url) => {
-    if (typeof navigator === 'undefined' || !/Android/i.test(navigator.userAgent)) {
-      return url;
+  //
+  // The fix: instead of navigating to a calendar.google.com URL (which gets
+  // intercepted by App Links and goes to the Calendar app's main activity),
+  // fire a direct Calendar INSERT intent. This uses Android's
+  // android.intent.action.INSERT action with vnd.android.cursor.item/event
+  // MIME type, which routes to the Calendar app's dedicated "create event"
+  // Activity — a separate, simpler component that accepts structured event
+  // data as intent extras and works even on cold start because it doesn't
+  // need the calendar list synced to show the event creation form.
+  //
+  // The Google Calendar web URL is included as browser_fallback_url so Chrome
+  // opens it in a tab if no calendar app is installed.
+  const openGoogleCalendar = (session, race) => {
+    const times = getSessionTimes(session.name, session.rawTime);
+    if (!times) return;
+
+    const title = `F1 ${race.date.split('-')[0]} - ${race.raceName} - ${session.name}`;
+    const description = `Formula 1 - ${race.raceName} - ${session.name} session. Powered by F1 Paddock Analytics.`;
+    const location = `${race.Circuit.circuitName}, ${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`;
+
+    const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    if (isAndroid) {
+      // Build a Calendar INSERT intent URI. Android's intent filter for
+      // calendar event creation uses action INSERT + event MIME type.
+      // Event details are passed as typed extras: S. = String, l. = long.
+      const fallbackUrl = getGoogleCalendarLink(session, race);
+      const intentParts = [
+        'intent://#Intent',
+        'action=android.intent.action.INSERT',
+        'type=vnd.android.cursor.item/event',
+        `S.title=${encodeURIComponent(title)}`,
+        `S.description=${encodeURIComponent(description)}`,
+        `S.eventLocation=${encodeURIComponent(location)}`,
+        `l.beginTime=${times.start.getTime()}`,
+        `l.endTime=${times.end.getTime()}`,
+        `S.browser_fallback_url=${encodeURIComponent(fallbackUrl)}`,
+        'end',
+      ];
+      window.location.href = intentParts.join(';');
+    } else if (isIOS) {
+      // On iOS, try the Google Calendar app's URL scheme first.
+      // If the app is installed, iOS will open it and background our page;
+      // if not, the scheme silently fails (no error dialog on modern iOS).
+      // We detect which happened via visibilitychange: if the page goes
+      // hidden within ~1.5 s the app opened; otherwise fall back to the
+      // Google Calendar web page in a new Safari tab.
+      const webUrl = getGoogleCalendarLink(session, race);
+      const formatISO = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const appUrl = `googlecalendar://event/new?title=${encodeURIComponent(title)}&begin=${formatISO(times.start)}&end=${formatISO(times.end)}&location=${encodeURIComponent(location)}&notes=${encodeURIComponent(description)}`;
+
+      let didLeave = false;
+      const onVisibility = () => { if (document.hidden) didLeave = true; };
+      document.addEventListener('visibilitychange', onVisibility);
+
+      window.location.href = appUrl;
+
+      setTimeout(() => {
+        document.removeEventListener('visibilitychange', onVisibility);
+        if (!didLeave) {
+          // App didn't open — not installed. Open the web version.
+          window.open(webUrl, '_blank', 'noopener,noreferrer');
+        }
+      }, 1500);
+    } else {
+      // Desktop / other — just open the Google Calendar web page.
+      const rawUrl = getGoogleCalendarLink(session, race);
+      window.open(rawUrl, '_blank', 'noopener,noreferrer');
     }
-    const withoutScheme = url.replace(/^https?:\/\//, '');
-    return `intent://${withoutScheme}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
   };
 
   // Google Calendar link builder
@@ -156,7 +217,8 @@ export default function RaceCard({ race, isNext }) {
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
   };
 
-  // iCal/ICS file downloader
+  // iCal/ICS — opens directly in Apple Calendar on iOS, downloads .ics
+  // file on Android/desktop (for Outlook, Google Calendar import, etc.).
   const downloadIcsFile = (session, race) => {
     const times = getSessionTimes(session.name, session.rawTime);
     if (!times) return;
@@ -189,15 +251,27 @@ export default function RaceCard({ race, isNext }) {
       "END:VCALENDAR"
     ];
 
-    const blob = new Blob([icsLines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `${title.replace(/[^a-zA-Z0-9]/g, "_")}.ics`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const icsContent = icsLines.join("\r\n");
+    const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isIOS) {
+      // On iOS, the <a download> pattern just dumps the file into the Files
+      // app instead of opening it in Calendar. Using a data: URI with the
+      // text/calendar MIME type makes iOS recognise the content as a
+      // calendar event and present the native "Add to Calendar" dialog.
+      window.location.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+    } else {
+      // Android / desktop — trigger a normal .ics file download.
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${title.replace(/[^a-zA-Z0-9]/g, "_")}.ics`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   useEffect(() => {
@@ -489,16 +563,7 @@ export default function RaceCard({ race, isNext }) {
                             <button
                               className={styles.popoverItem}
                               onClick={() => {
-                                const rawUrl = getGoogleCalendarLink(session, race);
-                                const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-                                if (isAndroid) {
-                                  // Top-level navigation so Chrome intercepts the
-                                  // intent:// URI itself; window.open doesn't reliably
-                                  // resolve this scheme.
-                                  window.location.href = buildCalendarNavUrl(rawUrl);
-                                } else {
-                                  window.open(rawUrl, '_blank', 'noopener,noreferrer');
-                                }
+                                openGoogleCalendar(session, race);
                                 setActiveCalendarIndex(null);
                               }}
                             >
