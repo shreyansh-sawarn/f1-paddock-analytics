@@ -132,23 +132,31 @@ export default function RaceCard({ race, isNext }) {
   };
 
   // On Android, our installed PWA counts as a separate "app" handing off a URL,
-  // so Android's App Links resolve calendar.google.com to whatever native calendar
-  // app is registered for it instead of opening the page in Chrome. If that app
-  // hasn't finished loading its calendar list yet (cold start), it shows "no
-  // calendar has been synchronised with this device yet" instead of adding the
-  // event — which is also why it works fine once that app is already warm.
+  // so Android's App Links resolve calendar.google.com to the native Google
+  // Calendar app instead of opening the page in Chrome. If that app hasn't
+  // finished loading its calendar list yet (cold start), it shows "no calendar
+  // has been synchronised with this device yet" instead of adding the event —
+  // which is also why it works fine once that app is already warm.
   //
-  // The fix: instead of navigating to a calendar.google.com URL (which gets
-  // intercepted by App Links and goes to the Calendar app's main activity),
-  // fire a direct Calendar INSERT intent. This uses Android's
-  // android.intent.action.INSERT action with vnd.android.cursor.item/event
-  // MIME type, which routes to the Calendar app's dedicated "create event"
-  // Activity — a separate, simpler component that accepts structured event
-  // data as intent extras and works even on cold start because it doesn't
-  // need the calendar list synced to show the event creation form.
+  // This is a bug in Google's Calendar app, not something we can influence:
+  // it reproduces on a cold start by tapping a bare
+  // calendar.google.com/calendar/render?action=TEMPLATE URL from any app, with
+  // our PWA out of the picture entirely. No URL parameter or intent flag changes
+  // when the app finishes syncing, so there is no client-side fix. The
+  // render?action=TEMPLATE base URL below is already the correct one — the older
+  // /r/eventedit form is a separate, known-broken case on Android.
   //
-  // The Google Calendar web URL is included as browser_fallback_url so Chrome
-  // opens it in a tab if no calendar app is installed.
+  // Firing a native android.intent.action.INSERT intent would be the ideal fix,
+  // but Chrome only launches intent:// URIs whose target activity declares
+  // android.intent.category.BROWSABLE (a security rule so web pages can't fire
+  // arbitrary intents into apps). Calendar's event-insert activity doesn't
+  // declare it, so that intent never resolves.
+  //
+  // So instead we target the Chrome package explicitly. Chrome's main activity
+  // *is* BROWSABLE, so this resolves, and routing through it bypasses App Links
+  // resolution entirely — the prefilled Google Calendar web template opens in a
+  // browser tab where it works reliably, cold start or not. browser_fallback_url
+  // covers the case where Chrome isn't installed.
   const openGoogleCalendar = (session, race) => {
     const times = getSessionTimes(session.name, session.rawTime);
     if (!times) return;
@@ -162,23 +170,17 @@ export default function RaceCard({ race, isNext }) {
     const isIOS = isIOSDevice();
 
     if (isAndroid) {
-      // Build a Calendar INSERT intent URI. Android's intent filter for
-      // calendar event creation uses action INSERT + event MIME type.
-      // Event details are passed as typed extras: S. = String, l. = long.
-      const fallbackUrl = getGoogleCalendarLink(session, race);
-      const intentParts = [
-        'intent://#Intent',
-        'action=android.intent.action.INSERT',
-        'type=vnd.android.cursor.item/event',
-        `S.title=${encodeURIComponent(title)}`,
-        `S.description=${encodeURIComponent(description)}`,
-        `S.eventLocation=${encodeURIComponent(location)}`,
-        `l.beginTime=${times.start.getTime()}`,
-        `l.endTime=${times.end.getTime()}`,
-        `S.browser_fallback_url=${encodeURIComponent(fallbackUrl)}`,
+      // Route the prefilled web template through Chrome explicitly so Android's
+      // App Links can't divert it to the native Calendar app.
+      const webUrl = getGoogleCalendarLink(session, race);
+      const withoutScheme = webUrl.replace(/^https?:\/\//, '');
+      window.location.href = [
+        `intent://${withoutScheme}#Intent`,
+        'scheme=https',
+        'package=com.android.chrome',
+        `S.browser_fallback_url=${encodeURIComponent(webUrl)}`,
         'end',
-      ];
-      window.location.href = intentParts.join(';');
+      ].join(';');
     } else if (isIOS) {
       // On iOS, try the Google Calendar app's URL scheme first.
       // If the app is installed, iOS will open it and background our page;
