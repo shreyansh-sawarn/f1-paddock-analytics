@@ -1,8 +1,15 @@
+/* Single-cell grid whose one child (.cardInner) stretches to fill it. Height is
+   content-driven with a floor instead of a fixed value: on a narrow phone column
+   the front's circuit name wraps to two lines and the back's stats (e.g. a lap
+   record like "1:31.447 (Pedro de la Rosa, 2005)") wrap to three, which a fixed
+   380px clipped. min-height keeps short cards from collapsing and preserves the
+   previous desktop proportions. */
 .cardContainer {
   background-color: transparent;
   perspective: 1000px;
   width: 100%;
-  height: 380px; /* Fixed height to prevent grid stretch */
+  display: grid;
+  min-height: 380px;
   cursor: pointer;
 }
 
@@ -10,13 +17,13 @@
    sits taller so it visually anchors the top of the page. */
 .featuredContainer {
   grid-column: span 2;
-  height: 520px;
+  min-height: 520px;
 }
 
 @media (max-width: 900px) {
   .featuredContainer {
     grid-column: span 1;
-    height: 460px;
+    min-height: 460px;
   }
 }
 
@@ -109,8 +116,11 @@
   to { opacity: 1; transform: scale(1.15); }
 }
 
+/* Both faces sit in the same grid cell rather than being absolutely positioned,
+   so the card's height follows max(front, back) content height. */
 .cardInner {
   position: relative;
+  display: grid;
   width: 100%;
   height: 100%;
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -142,9 +152,10 @@
 }
 
 .cardFront, .cardBack {
-  position: absolute;
+  grid-area: 1 / 1;
+  position: relative;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   -webkit-backface-visibility: hidden; /* Safari */
   backface-visibility: hidden;
   border-radius: var(--border-radius);
@@ -193,7 +204,7 @@
 
 .cardInfo {
   padding: 1.25rem 1.5rem;
-  flex: 1;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -254,7 +265,7 @@
   position: relative;
   z-index: 1;
   padding: 2rem 1.5rem;
-  height: 100%;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
 }
@@ -277,7 +288,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem 1rem;
-  flex: 1;
+  flex: 1 0 auto;
 }
 
 .statBox {
@@ -560,4 +571,95 @@
   to { r: 9px; opacity: 0.6; }
 }
 
+/* Phone layout: the card column is ~340px wide, so every text block on both
+   faces wraps far more than it does on desktop. Tighten the padding, map and
+   type so a card stays a reasonable height now that it grows with its content
+   instead of clipping at a fixed one. */
+@media (max-width: 600px) {
+  .cardContainer {
+    min-height: 340px;
+  }
 
+  .mapContainer {
+    height: 200px;
+    padding: 1rem;
+  }
+
+  .svgMap {
+    max-height: 160px;
+  }
+
+  .featuredContainer .mapContainer {
+    height: 240px;
+  }
+
+  .featuredContainer .svgMap {
+    max-height: 210px;
+  }
+
+  .cardInfo {
+    padding: 1rem 1.15rem;
+    gap: 0.75rem;
+  }
+
+  .circuitName {
+    font-size: 1.05rem;
+  }
+
+  .backContent {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .circuitNameBack {
+    font-size: 1.25rem;
+  }
+
+  .locationBack {
+    margin-bottom: 1.25rem;
+  }
+
+  .statsGrid {
+    gap: 1rem 0.85rem;
+  }
+
+  .statValue {
+    font-size: 0.9rem;
+  }
+
+  .statLabel {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+
+  .flipHintBack {
+    padding-top: 1.25rem;
+  }
+
+  /* The telemetry HUD is a single nowrap line on desktop; in a phone-width card
+     that ellipsised the part that carries the actual information (the corner
+     name, the Overtake Mode description). Let it wrap onto its own lines and
+     grow upward over the map instead. */
+  .hudOverlay {
+    padding: 0.5rem 0.9rem;
+  }
+
+  .hudHeaderRow {
+    flex-wrap: wrap;
+    gap: 0.3rem 0.6rem;
+    padding-right: 1.5rem;
+  }
+
+  .hudTextDetail {
+    flex: 1 0 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.4;
+  }
+
+  .hudClose {
+    top: 0.45rem;
+    transform: none;
+    font-size: 1.05rem;
+  }
+}
