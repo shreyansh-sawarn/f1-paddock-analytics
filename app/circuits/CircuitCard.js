@@ -56,6 +56,12 @@ const getSectorData = (circuitId, sector) => {
       2: { maxSpeed: "320 km/h", minSpeed: "120 km/h", gear: "3rd", corner: "Variante Roggia & Lesmos" },
       3: { maxSpeed: "350 km/h", minSpeed: "215 km/h", gear: "6th", corner: "Variante Ascari & Parabolica" },
       overtake: { flavor: "F1's fastest straights make this the best track all year to cash it in" }
+    },
+    // Flavor only - Sepang's two long straights are a stable layout fact, but we
+    // have no verified sector telemetry for it, so 1/2/3 fall through to the
+    // fallback rather than inventing speeds.
+    sepang: {
+      overtake: { flavor: "Best spent down the long back straight into the Turn 15 hairpin" }
     }
   };
 
