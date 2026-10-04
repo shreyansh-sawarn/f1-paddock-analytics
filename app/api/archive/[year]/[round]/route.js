@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
+import { fetchOpenF1RaceResults } from '@/lib/openf1';
 
 export const dynamic = 'force-dynamic';
+
+// revalidateSecs === 0 means "don't cache at all" - used while a weekend is
+// still in progress, where a cached empty response would hide a session that
+// has since finished.
+const cacheOptions = (revalidateSecs) =>
+  revalidateSecs === 0 ? { cache: 'no-store' } : { next: { revalidate: revalidateSecs } };
 
 async function fetchWithRetry(url, revalidateSecs, retries = 3, delay = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
-      const res = await fetch(url, {
-        next: { revalidate: revalidateSecs }
-      });
+      const res = await fetch(url, cacheOptions(revalidateSecs));
       
       if (res.status === 429) {
         console.warn(`Rate limited (429) on ${url}. Retrying in ${delay}ms... (Attempt ${i + 1}/${retries})`);
@@ -29,13 +34,20 @@ export async function GET(request, { params }) {
   const { year, round } = await params;
   const currentYear = new Date().getFullYear();
   const isPastYear = parseInt(year, 10) < currentYear;
-  const revalidateSecs = isPastYear ? 31536000 : 86400; // 1 year for past seasons, 1 day for current season
+  // Current-season session results are only cached for a minute. They used
+  // to be cached for a day, so opening a card on Friday (before Qualifying /
+  // the Sprint had run) cached an empty qualifying.json / sprint.json, and
+  // after those sessions finished the card still came back empty until the
+  // cache expired or a later request picked up the background revalidation.
+  // Once the race itself is classified the weekend is final and the
+  // remaining (OpenF1) lookups below go back to long caching.
+  const ergastRevalidateSecs = isPastYear ? 31536000 : 60; // 1 year for past seasons, 1 minute for current season
 
   try {
     const [resData, qualData, sprintData] = await Promise.all([
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/results.json`, { next: { revalidate: revalidateSecs } }),
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/qualifying.json`, { next: { revalidate: revalidateSecs } }),
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/sprint.json`, { next: { revalidate: revalidateSecs } })
+      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/results.json`, cacheOptions(ergastRevalidateSecs)),
+      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/qualifying.json`, cacheOptions(ergastRevalidateSecs)),
+      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/sprint.json`, cacheOptions(ergastRevalidateSecs))
     ]);
 
     const resultsJson = await resData.json();
@@ -43,17 +55,21 @@ export async function GET(request, { params }) {
     const sprintJson = await sprintData.json();
     
     let race = resultsJson?.MRData?.RaceTable?.Races?.[0];
+    const weekendComplete = (race?.Results?.length || 0) > 0;
+    // OpenF1 Sprint Qualifying laps/drivers would otherwise get cached empty
+    // (or partial) for a day if fetched before that session finished.
+    const revalidateSecs = isPastYear ? 31536000 : weekendComplete ? 86400 : 0;
     
     // Fallback: If race hasn't happened, fetch schedule to get the exact date
     if (!race) {
-      const scheduleRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}.json`, { next: { revalidate: revalidateSecs } });
+      const scheduleRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}.json`, cacheOptions(86400));
       if (scheduleRes.ok) {
         const schedJson = await scheduleRes.json();
         race = schedJson?.MRData?.RaceTable?.Races?.[0];
       }
     }
 
-    const results = race?.Results || [];
+    let results = race?.Results || [];
     const qualifying = qualJson?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
     const sprint = sprintJson?.MRData?.RaceTable?.Races?.[0]?.SprintResults || [];
 
@@ -158,6 +174,12 @@ export async function GET(request, { params }) {
 
           const qualifyingSession = weekendSessions.find(s => s.session_name === 'Qualifying');
           const mainRace = weekendSessions.find(s => s.session_name === 'Race');
+
+          // Race finished but jolpica hasn't published it yet - fall back to
+          // OpenF1's provisional classification (same as /api/results does).
+          if (!results.length && mainRace) {
+            results = await fetchOpenF1RaceResults(mainRace.session_key, qualifying, revalidateSecs === 0 ? 60 : revalidateSecs);
+          }
           if (qualifyingSession) {
             openf1SessionKey = qualifyingSession.session_key;
           } else if (mainRace) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchOpenF1SessionsForYear, matchOpenF1Session, fetchChequeredFlagEnd } from '@/lib/openf1';
+import { fetchOpenF1SessionsForYear, matchOpenF1Session, fetchChequeredFlagEnd, fetchOpenF1RaceResults } from '@/lib/openf1';
 
 async function fetchJson(url, revalidateSecs) {
   try {
@@ -69,15 +69,28 @@ export async function GET() {
           fetchJson(`https://api.jolpi.ca/ergast/f1/current/${race.round}/qualifying.json`, 300),
           fetchJson(`https://api.jolpi.ca/ergast/f1/current/${race.round}/sprint.json`, 300),
         ]);
-        const hasQualifying = (qualData?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults?.length || 0) > 0;
+        const qualifyingResults = qualData?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
+        const hasQualifying = qualifyingResults.length > 0;
         const hasSprint = (sprintData?.MRData?.RaceTable?.Races?.[0]?.SprintResults?.length || 0) > 0;
-        return { round: race.round, hasQualifying, hasSprint };
+        return { round: race.round, hasQualifying, hasSprint, qualifyingResults };
       })
     );
 
     const sessionFlagsByRound = {};
-    sessionChecks.forEach(({ round, hasQualifying, hasSprint }) => {
+    const qualifyingByRound = {};
+    sessionChecks.forEach(({ round, hasQualifying, hasSprint, qualifyingResults }) => {
       sessionFlagsByRound[round] = { hasQualifying, hasSprint };
+      qualifyingByRound[round] = qualifyingResults;
+    });
+
+    // Rounds whose race has started but that jolpica hasn't published
+    // results for yet - it typically lags a day or more behind the race.
+    // OpenF1 has the classification within minutes, so use it as a
+    // provisional result until Ergast catches up.
+    const now = Date.now();
+    const roundsAwaitingErgastResults = roundsNeedingCheck.filter(race => {
+      const start = new Date(`${race.date}T${race.time || '00:00:00Z'}`).getTime();
+      return start <= now;
     });
 
     // 4. Ergast has no dedicated results endpoint for Sprint Qualifying (this
@@ -92,10 +105,19 @@ export async function GET() {
     });
 
     let openf1Sessions = [];
-    if (roundsNeedingSprintQualiCheck.length > 0) {
+    if (roundsNeedingSprintQualiCheck.length > 0 || roundsAwaitingErgastResults.length > 0) {
       const year = scheduleData.MRData.RaceTable.season;
       openf1Sessions = await fetchOpenF1SessionsForYear(year);
     }
+
+    await Promise.all(
+      roundsAwaitingErgastResults.map(async (race) => {
+        const match = matchOpenF1Session(openf1Sessions, race.date, race.time, 'Race');
+        if (!match) return;
+        const provisional = await fetchOpenF1RaceResults(match.session_key, qualifyingByRound[race.round]);
+        if (provisional.length > 0) finalResultsByRound[race.round] = provisional;
+      })
+    );
 
     const sprintQualiFlagsByRound = {};
     await Promise.all(

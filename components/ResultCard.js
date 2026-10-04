@@ -92,8 +92,11 @@ export default function ResultCard({ race }) {
     const newExpanded = !expanded;
     setExpanded(newExpanded);
     
-    if (newExpanded && !sessionData) {
-      setLoading(true);
+    // Until the race is classified the weekend is still in progress, so
+    // refetch on every open - otherwise sessions that finished after the
+    // first open (e.g. Qualifying after Sprint Qualifying) never appear.
+    if (newExpanded && (!sessionData || !hasRaceResults)) {
+      if (!sessionData) setLoading(true);
       try {
         const res = await fetch(`/api/archive/${race.season}/${race.round}`);
         if (!res.ok) throw new Error('Failed to fetch session data');
@@ -252,6 +255,11 @@ export default function ResultCard({ race }) {
                 {!hasRaceResults && !sessionData.results?.length && !sessionData.sprint?.length && !sessionData.qualifying?.length && !sessionData.sprintQualifying?.length && (
                   <div style={{ padding: '1rem', color: 'var(--text-muted)' }}>
                     Session results aren&apos;t published yet - check back once the next session wraps up.
+                  </div>
+                )}
+                {activeTab === 'race' && (sessionData.results?.length ? sessionData.results : initialResults)[0]?.provisional && (
+                  <div style={{ padding: '0.75rem 1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>
+                    Provisional classification from OpenF1 - official results will replace it once published.
                   </div>
                 )}
                 {activeTab === 'race' && renderTable(sessionData.results || initialResults, false)}
