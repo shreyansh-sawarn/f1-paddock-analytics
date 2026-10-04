@@ -92,8 +92,11 @@ export default function ResultCard({ race }) {
     const newExpanded = !expanded;
     setExpanded(newExpanded);
     
-    if (newExpanded && !sessionData) {
-      setLoading(true);
+    // Until the race is classified the weekend is still in progress, so
+    // refetch on every open - otherwise sessions that finished after the
+    // first open (e.g. Qualifying after Sprint Qualifying) never appear.
+    if (newExpanded && (!sessionData || !hasRaceResults)) {
+      if (!sessionData) setLoading(true);
       try {
         const res = await fetch(`/api/archive/${race.season}/${race.round}`);
         if (!res.ok) throw new Error('Failed to fetch session data');
