@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { fetchOpenF1RaceResults } from '@/lib/openf1';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +69,7 @@ export async function GET(request, { params }) {
       }
     }
 
-    const results = race?.Results || [];
+    let results = race?.Results || [];
     const qualifying = qualJson?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
     const sprint = sprintJson?.MRData?.RaceTable?.Races?.[0]?.SprintResults || [];
 
@@ -173,6 +174,12 @@ export async function GET(request, { params }) {
 
           const qualifyingSession = weekendSessions.find(s => s.session_name === 'Qualifying');
           const mainRace = weekendSessions.find(s => s.session_name === 'Race');
+
+          // Race finished but jolpica hasn't published it yet - fall back to
+          // OpenF1's provisional classification (same as /api/results does).
+          if (!results.length && mainRace) {
+            results = await fetchOpenF1RaceResults(mainRace.session_key, qualifying, revalidateSecs === 0 ? 60 : revalidateSecs);
+          }
           if (qualifyingSession) {
             openf1SessionKey = qualifyingSession.session_key;
           } else if (mainRace) {

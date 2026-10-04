@@ -257,6 +257,11 @@ export default function ResultCard({ race }) {
                     Session results aren&apos;t published yet - check back once the next session wraps up.
                   </div>
                 )}
+                {activeTab === 'race' && (sessionData.results?.length ? sessionData.results : initialResults)[0]?.provisional && (
+                  <div style={{ padding: '0.75rem 1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>
+                    Provisional classification from OpenF1 - official results will replace it once published.
+                  </div>
+                )}
                 {activeTab === 'race' && renderTable(sessionData.results || initialResults, false)}
                 {activeTab === 'sprint' && renderTable(sessionData.sprint, false)}
                 {activeTab === 'qualifying' && renderTable(sessionData.qualifying, true)}

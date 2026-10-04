@@ -429,12 +429,12 @@ export default function TelemetryDashboard({ openf1SessionKey, openf1Sessions = 
             {/* Drivers Stats Info Overlay - Positioned Below Chart */}
             <div className={styles.chartLegend}>
               <div className={`${styles.legendItem} ${styles.legendA}`}>
-                <TeamLogo constructorId={driverA?.Constructor?.constructorId} size="sm" />
+                <TeamLogo constructorId={driverA?.Constructor?.constructorId} constructorName={driverA?.Constructor?.name} size="sm" />
                 <span className={styles.legendName}>{driverA?.Driver.familyName}</span>
                 {telemetryA && <span className={styles.legendLap}>Lap {telemetryA.lapNumber} ({telemetryA.lapDuration}s)</span>}
               </div>
               <div className={`${styles.legendItem} ${styles.legendB}`}>
-                <TeamLogo constructorId={driverB?.Constructor?.constructorId} size="sm" />
+                <TeamLogo constructorId={driverB?.Constructor?.constructorId} constructorName={driverB?.Constructor?.name} size="sm" />
                 <span className={styles.legendName}>{driverB?.Driver.familyName}</span>
                 {telemetryB && <span className={styles.legendLap}>Lap {telemetryB.lapNumber} ({telemetryB.lapDuration}s)</span>}
               </div>
