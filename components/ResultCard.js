@@ -126,6 +126,11 @@ export default function ResultCard({ race }) {
     
     return (
       <div className={styles.fullResults}>
+        {data[0]?.provisional && (
+          <div style={{ padding: '0.75rem 1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>
+            Provisional classification from OpenF1 - official results will replace it once published.
+          </div>
+        )}
         <div className={styles.tableHeader}>
           <span className={styles.colPos}>Pos</span>
           <span className={styles.colDriver}>Driver</span>
@@ -255,11 +260,6 @@ export default function ResultCard({ race }) {
                 {!hasRaceResults && !sessionData.results?.length && !sessionData.sprint?.length && !sessionData.qualifying?.length && !sessionData.sprintQualifying?.length && (
                   <div style={{ padding: '1rem', color: 'var(--text-muted)' }}>
                     Session results aren&apos;t published yet - check back once the next session wraps up.
-                  </div>
-                )}
-                {activeTab === 'race' && (sessionData.results?.length ? sessionData.results : initialResults)[0]?.provisional && (
-                  <div style={{ padding: '0.75rem 1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)' }}>
-                    Provisional classification from OpenF1 - official results will replace it once published.
                   </div>
                 )}
                 {activeTab === 'race' && renderTable(sessionData.results || initialResults, false)}
