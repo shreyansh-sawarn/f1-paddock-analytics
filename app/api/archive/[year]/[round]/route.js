@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchOpenF1RaceResults } from '@/lib/openf1';
+import { fetchOpenF1RaceResults, fetchOpenF1QualifyingResults } from '@/lib/openf1';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,15 +44,14 @@ export async function GET(request, { params }) {
   const ergastRevalidateSecs = isPastYear ? 31536000 : 60; // 1 year for past seasons, 1 minute for current season
 
   try {
-    const [resData, qualData, sprintData] = await Promise.all([
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/results.json`, cacheOptions(ergastRevalidateSecs)),
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/qualifying.json`, cacheOptions(ergastRevalidateSecs)),
-      fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}/sprint.json`, cacheOptions(ergastRevalidateSecs))
+    // A jolpica 429 has a plain-text body, so never call .json() on a
+    // non-OK response - that threw and failed the whole request.
+    const readJson = async (res) => (res?.ok ? res.json() : null);
+    const [resultsJson, qualJson, sprintJson] = await Promise.all([
+      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/${round}/results.json`, ergastRevalidateSecs).then(readJson),
+      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/${round}/qualifying.json`, ergastRevalidateSecs).then(readJson),
+      fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/${round}/sprint.json`, ergastRevalidateSecs).then(readJson)
     ]);
-
-    const resultsJson = await resData.json();
-    const qualJson = await qualData.json();
-    const sprintJson = await sprintData.json();
     
     let race = resultsJson?.MRData?.RaceTable?.Races?.[0];
     const weekendComplete = (race?.Results?.length || 0) > 0;
@@ -62,18 +61,32 @@ export async function GET(request, { params }) {
     
     // Fallback: If race hasn't happened, fetch schedule to get the exact date
     if (!race) {
-      const scheduleRes = await fetch(`https://api.jolpi.ca/ergast/f1/${year}/${round}.json`, cacheOptions(86400));
-      if (scheduleRes.ok) {
-        const schedJson = await scheduleRes.json();
-        race = schedJson?.MRData?.RaceTable?.Races?.[0];
-      }
+      const schedJson = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/${round}.json`, 86400).then(readJson);
+      race = schedJson?.MRData?.RaceTable?.Races?.[0];
     }
 
     let results = race?.Results || [];
-    const qualifying = qualJson?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
-    const sprint = sprintJson?.MRData?.RaceTable?.Races?.[0]?.SprintResults || [];
+    let qualifying = qualJson?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
+    let sprint = sprintJson?.MRData?.RaceTable?.Races?.[0]?.SprintResults || [];
+
+    const openf1Revalidate = revalidateSecs === 0 ? 60 : revalidateSecs;
+    // Ergast Driver/Constructor objects for naming OpenF1 results: this
+    // round's qualifying if published, else the season's latest race.
+    // Fetched at most once, and only if an OpenF1 lookup needs it.
+    let ergastEntries = qualifying.length ? qualifying : null;
+    const getErgastEntries = async () => {
+      if (!ergastEntries) {
+        const lastJson = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/last/results.json`, 3600).then(readJson);
+        ergastEntries = lastJson?.MRData?.RaceTable?.Races?.[0]?.Results || [];
+      }
+      return ergastEntries;
+    };
 
     // --- OpenF1 Sprint Qualifying Integration ---
+    // Ergast never publishes Sprint Qualifying, so OpenF1 is the only
+    // source. Prefer its official classification (correct knockout order,
+    // SQ1/SQ2/SQ3 times); only if that isn't available, fall back to
+    // ranking each driver's single best lap.
     let sprintQualifying = [];
     if (race && race.date) {
       const raceDate = new Date(race.date);
@@ -95,6 +108,15 @@ export async function GET(request, { params }) {
         });
 
         if (targetSession) {
+          sprintQualifying = await fetchOpenF1QualifyingResults(
+            targetSession.session_key,
+            await getErgastEntries(),
+            openf1Revalidate,
+            { provisional: false }
+          );
+        }
+
+        if (targetSession && !sprintQualifying.length) {
           const [driversRes, lapsRes] = await Promise.all([
             fetchWithRetry(`https://api.openf1.org/v1/drivers?session_key=${targetSession.session_key}`, revalidateSecs),
             fetchWithRetry(`https://api.openf1.org/v1/laps?session_key=${targetSession.session_key}`, revalidateSecs)
@@ -175,10 +197,23 @@ export async function GET(request, { params }) {
           const qualifyingSession = weekendSessions.find(s => s.session_name === 'Qualifying');
           const mainRace = weekendSessions.find(s => s.session_name === 'Race');
 
-          // Race finished but jolpica hasn't published it yet - fall back to
-          // OpenF1's provisional classification (same as /api/results does).
-          if (!results.length && mainRace) {
-            results = await fetchOpenF1RaceResults(mainRace.session_key, qualifying, revalidateSecs === 0 ? 60 : revalidateSecs);
+          // Sessions that have finished but that jolpica hasn't published
+          // yet (it often lags a day or more) - fall back to OpenF1's
+          // provisional classification, same as /api/results does.
+          const sprintSession = weekendSessions.find(s => s.session_name === 'Sprint');
+          const needsFallback = (!results.length && mainRace) || (!qualifying.length && qualifyingSession) || (!sprint.length && sprintSession);
+          if (needsFallback) {
+            const ergastEntries = await getErgastEntries();
+            // One session at a time to stay under OpenF1's rate limit.
+            if (!sprint.length && sprintSession) {
+              sprint = await fetchOpenF1RaceResults(sprintSession.session_key, ergastEntries, openf1Revalidate);
+            }
+            if (!qualifying.length && qualifyingSession) {
+              qualifying = await fetchOpenF1QualifyingResults(qualifyingSession.session_key, ergastEntries, openf1Revalidate);
+            }
+            if (!results.length && mainRace) {
+              results = await fetchOpenF1RaceResults(mainRace.session_key, ergastEntries, openf1Revalidate);
+            }
           }
           if (qualifyingSession) {
             openf1SessionKey = qualifyingSession.session_key;

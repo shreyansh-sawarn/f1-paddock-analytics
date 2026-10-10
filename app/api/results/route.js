@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
-import { fetchOpenF1SessionsForYear, matchOpenF1Session, fetchChequeredFlagEnd, fetchOpenF1RaceResults } from '@/lib/openf1';
+import { fetchOpenF1SessionsForYear, matchOpenF1Session, fetchChequeredFlagEnd, fetchOpenF1RaceResults, fetchOpenF1QualifyingResults } from '@/lib/openf1';
 
-async function fetchJson(url, revalidateSecs) {
+// jolpica rate-limits bursts with a 429 (plain-text body, Retry-After in
+// seconds). Retry a couple of times rather than treating it as "no data".
+async function fetchJson(url, revalidateSecs, retries = 2) {
   try {
-    const res = await fetch(url, { next: { revalidate: revalidateSecs } });
-    if (!res.ok) return null;
-    return await res.json();
+    for (let attempt = 0; ; attempt++) {
+      const res = await fetch(url, { next: { revalidate: revalidateSecs } });
+      if (res.status === 429 && attempt < retries) {
+        const waitSecs = Math.min(parseInt(res.headers.get('retry-after'), 10) || 2, 10);
+        await new Promise(resolve => setTimeout(resolve, waitSecs * 1000));
+        continue;
+      }
+      if (!res.ok) return null;
+      return await res.json();
+    }
   } catch (err) {
     console.error(`Failed to fetch ${url}:`, err);
     return null;
@@ -57,40 +66,76 @@ export async function GET() {
     // which red flags/rain delays routinely blow past. For qualifying/sprint/
     // race, Ergast simply won't have entries until the session is fully
     // classified, so checking for real data is itself immune to overruns.
-    // Only rounds still missing final results need this extra check -
-    // everything else is already confirmed done via the fetch above.
-    const roundsNeedingCheck = scheduledRaces.filter(
-      race => !(finalResultsByRound[race.round]?.length > 0)
+    // Only rounds still missing final results *whose weekend has started*
+    // need this extra check - checking every remaining round of the season
+    // fired ~20 jolpica requests at once, which trips its rate limit (429)
+    // and made finished sessions look unpublished.
+    const now = Date.now();
+    const hasStarted = (session) =>
+      !!session?.date && new Date(`${session.date}T${session.time || '00:00:00Z'}`).getTime() <= now;
+    const roundsNeedingCheck = scheduledRaces.filter(race =>
+      !(finalResultsByRound[race.round]?.length > 0) &&
+      [race.FirstPractice, race.SprintQualifying, race.Sprint, race.Qualifying, race].some(hasStarted)
     );
+
+    // jolpica also typically lags a day or more behind each session. OpenF1
+    // has the classification within minutes of the chequered flag, so it's
+    // used as a provisional result until Ergast catches up.
+    let openf1Sessions = [];
+    if (roundsNeedingCheck.length > 0) {
+      const year = scheduleData.MRData.RaceTable.season;
+      openf1Sessions = await fetchOpenF1SessionsForYear(year);
+    }
+
+    // Ergast Driver/Constructor objects for naming OpenF1 results - this
+    // round's qualifying if published, else the latest completed race.
+    const latestErgastEntries = completedRaces.reduce(
+      (latest, race) => (!latest || parseInt(race.round, 10) > parseInt(latest.round, 10) ? race : latest),
+      null
+    )?.Results || [];
+
+    const provisionalHas = async (race, sessionLabel, fetcher, ergastEntries) => {
+      const session = sessionLabel === 'Race' ? race : race[sessionLabel];
+      const match = matchOpenF1Session(openf1Sessions, session.date, session.time, sessionLabel);
+      return match ? fetcher(match.session_key, ergastEntries) : [];
+    };
 
     const sessionChecks = await Promise.all(
       roundsNeedingCheck.map(async (race) => {
         const [qualData, sprintData] = await Promise.all([
-          fetchJson(`https://api.jolpi.ca/ergast/f1/current/${race.round}/qualifying.json`, 300),
-          fetchJson(`https://api.jolpi.ca/ergast/f1/current/${race.round}/sprint.json`, 300),
+          hasStarted(race.Qualifying)
+            ? fetchJson(`https://api.jolpi.ca/ergast/f1/current/${race.round}/qualifying.json`, 300)
+            : null,
+          hasStarted(race.Sprint)
+            ? fetchJson(`https://api.jolpi.ca/ergast/f1/current/${race.round}/sprint.json`, 300)
+            : null,
         ]);
         const qualifyingResults = qualData?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
-        const hasQualifying = qualifyingResults.length > 0;
-        const hasSprint = (sprintData?.MRData?.RaceTable?.Races?.[0]?.SprintResults?.length || 0) > 0;
-        return { round: race.round, hasQualifying, hasSprint, qualifyingResults };
+        const ergastEntries = qualifyingResults.length > 0 ? qualifyingResults : latestErgastEntries;
+        let hasQualifying = qualifyingResults.length > 0;
+        let hasSprint = (sprintData?.MRData?.RaceTable?.Races?.[0]?.SprintResults?.length || 0) > 0;
+
+        // One session at a time to stay under OpenF1's rate limit.
+        const provisionalSprint = !hasSprint && hasStarted(race.Sprint)
+          ? await provisionalHas(race, 'Sprint', fetchOpenF1RaceResults, ergastEntries)
+          : [];
+        const provisionalQuali = !hasQualifying && hasStarted(race.Qualifying)
+          ? await provisionalHas(race, 'Qualifying', fetchOpenF1QualifyingResults, ergastEntries)
+          : [];
+        const provisionalRace = hasStarted(race)
+          ? await provisionalHas(race, 'Race', fetchOpenF1RaceResults, ergastEntries)
+          : [];
+        hasQualifying = hasQualifying || provisionalQuali.length > 0;
+        hasSprint = hasSprint || provisionalSprint.length > 0;
+        if (provisionalRace.length > 0) finalResultsByRound[race.round] = provisionalRace;
+
+        return { round: race.round, hasQualifying, hasSprint };
       })
     );
 
     const sessionFlagsByRound = {};
-    const qualifyingByRound = {};
-    sessionChecks.forEach(({ round, hasQualifying, hasSprint, qualifyingResults }) => {
+    sessionChecks.forEach(({ round, hasQualifying, hasSprint }) => {
       sessionFlagsByRound[round] = { hasQualifying, hasSprint };
-      qualifyingByRound[round] = qualifyingResults;
-    });
-
-    // Rounds whose race has started but that jolpica hasn't published
-    // results for yet - it typically lags a day or more behind the race.
-    // OpenF1 has the classification within minutes, so use it as a
-    // provisional result until Ergast catches up.
-    const now = Date.now();
-    const roundsAwaitingErgastResults = roundsNeedingCheck.filter(race => {
-      const start = new Date(`${race.date}T${race.time || '00:00:00Z'}`).getTime();
-      return start <= now;
     });
 
     // 4. Ergast has no dedicated results endpoint for Sprint Qualifying (this
@@ -103,21 +148,6 @@ export async function GET() {
       const flags = sessionFlagsByRound[race.round];
       return race.SprintQualifying && !flags?.hasQualifying && !flags?.hasSprint;
     });
-
-    let openf1Sessions = [];
-    if (roundsNeedingSprintQualiCheck.length > 0 || roundsAwaitingErgastResults.length > 0) {
-      const year = scheduleData.MRData.RaceTable.season;
-      openf1Sessions = await fetchOpenF1SessionsForYear(year);
-    }
-
-    await Promise.all(
-      roundsAwaitingErgastResults.map(async (race) => {
-        const match = matchOpenF1Session(openf1Sessions, race.date, race.time, 'Race');
-        if (!match) return;
-        const provisional = await fetchOpenF1RaceResults(match.session_key, qualifyingByRound[race.round]);
-        if (provisional.length > 0) finalResultsByRound[race.round] = provisional;
-      })
-    );
 
     const sprintQualiFlagsByRound = {};
     await Promise.all(
