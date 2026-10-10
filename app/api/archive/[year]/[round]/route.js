@@ -69,7 +69,24 @@ export async function GET(request, { params }) {
     let qualifying = qualJson?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults || [];
     let sprint = sprintJson?.MRData?.RaceTable?.Races?.[0]?.SprintResults || [];
 
+    const openf1Revalidate = revalidateSecs === 0 ? 60 : revalidateSecs;
+    // Ergast Driver/Constructor objects for naming OpenF1 results: this
+    // round's qualifying if published, else the season's latest race.
+    // Fetched at most once, and only if an OpenF1 lookup needs it.
+    let ergastEntries = qualifying.length ? qualifying : null;
+    const getErgastEntries = async () => {
+      if (!ergastEntries) {
+        const lastJson = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/last/results.json`, 3600).then(readJson);
+        ergastEntries = lastJson?.MRData?.RaceTable?.Races?.[0]?.Results || [];
+      }
+      return ergastEntries;
+    };
+
     // --- OpenF1 Sprint Qualifying Integration ---
+    // Ergast never publishes Sprint Qualifying, so OpenF1 is the only
+    // source. Prefer its official classification (correct knockout order,
+    // SQ1/SQ2/SQ3 times); only if that isn't available, fall back to
+    // ranking each driver's single best lap.
     let sprintQualifying = [];
     if (race && race.date) {
       const raceDate = new Date(race.date);
@@ -91,6 +108,15 @@ export async function GET(request, { params }) {
         });
 
         if (targetSession) {
+          sprintQualifying = await fetchOpenF1QualifyingResults(
+            targetSession.session_key,
+            await getErgastEntries(),
+            openf1Revalidate,
+            { provisional: false }
+          );
+        }
+
+        if (targetSession && !sprintQualifying.length) {
           const [driversRes, lapsRes] = await Promise.all([
             fetchWithRetry(`https://api.openf1.org/v1/drivers?session_key=${targetSession.session_key}`, revalidateSecs),
             fetchWithRetry(`https://api.openf1.org/v1/laps?session_key=${targetSession.session_key}`, revalidateSecs)
@@ -177,14 +203,7 @@ export async function GET(request, { params }) {
           const sprintSession = weekendSessions.find(s => s.session_name === 'Sprint');
           const needsFallback = (!results.length && mainRace) || (!qualifying.length && qualifyingSession) || (!sprint.length && sprintSession);
           if (needsFallback) {
-            const openf1Revalidate = revalidateSecs === 0 ? 60 : revalidateSecs;
-            // Ergast Driver/Constructor objects for naming: this round's
-            // qualifying if published, else the season's latest race.
-            let ergastEntries = qualifying;
-            if (!ergastEntries.length) {
-              const lastJson = await fetchWithRetry(`https://api.jolpi.ca/ergast/f1/${year}/last/results.json`, 3600).then(readJson);
-              ergastEntries = lastJson?.MRData?.RaceTable?.Races?.[0]?.Results || [];
-            }
+            const ergastEntries = await getErgastEntries();
             // One session at a time to stay under OpenF1's rate limit.
             if (!sprint.length && sprintSession) {
               sprint = await fetchOpenF1RaceResults(sprintSession.session_key, ergastEntries, openf1Revalidate);
