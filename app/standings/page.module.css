@@ -307,8 +307,8 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-5px); max-height: 0; }
-  to { opacity: 1; transform: translateY(0); max-height: 500px; }
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .expandedStatsGrid {
